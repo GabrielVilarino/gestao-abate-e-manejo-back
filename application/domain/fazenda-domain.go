@@ -1,0 +1,9 @@
+package domain
+
+type Fazenda struct {
+	Nome           string
+	Cidade         string
+	InscricaoRural string
+	Observacao     string
+	IDProprietario int
+}
