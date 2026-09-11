@@ -38,6 +38,6 @@ func (p *ProprietarioService) UpdateProprietario(proprietario *domain.Proprietar
 	return p.ProprietarioPort.UpdateProprietario(proprietario)
 }
 
-func (p *ProprietarioService) DeleteProprietario(id string) error {
+func (p *ProprietarioService) DeleteProprietario(id int) error {
 	return p.ProprietarioPort.DeleteProprietario(id)
 }

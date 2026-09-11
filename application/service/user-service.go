@@ -70,6 +70,6 @@ func (u *UserService) UpdateUser(user *domain.User) error {
 	return u.UserPort.UpdateUser(user)
 }
 
-func (u *UserService) DeleteUser(id string) error {
+func (u *UserService) DeleteUser(id int) error {
 	return u.UserPort.DeleteUser(id)
 }

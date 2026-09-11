@@ -3,8 +3,8 @@ package output
 import "github.com/GabrielVilarino/gestao-abate-e-manejo-back/application/domain"
 
 type AbatePort interface {
-	Create(abate *domain.Abate) error
-	FindByFazendaID(id int) (*domain.Abate, error)
+	CreateAbate(abate *domain.Abate) error
+	FindAbateByFazendaID(id int) (*domain.Abate, error)
 	UpdateDadosGeraisAbate(
 		abateID int,
 		dados domain.DadosGeraisAbate,

@@ -23,7 +23,7 @@ type DistribuicaoPeso struct {
 
 type DadosGeraisAbate struct {
 	DataAbate        string
-	FazendaID        uint64
+	FazendaID        int
 	NomeFrigorifico  string
 	CategoriaAnimal  string
 	PrecoFunrural    float64

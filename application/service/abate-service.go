@@ -18,11 +18,11 @@ func NewAbateService(
 }
 
 func (a *AbateService) CreateAbate(abate *domain.Abate) error {
-	return a.AbatePort.Create(abate)
+	return a.AbatePort.CreateAbate(abate)
 }
 
 func (a *AbateService) FindAbateByFazendaID(id int) (*domain.Abate, error) {
-	return a.AbatePort.FindByFazendaID(id)
+	return a.AbatePort.FindAbateByFazendaID(id)
 }
 
 func (a *AbateService) UpdateDadosGeraisAbate(abateID int, dadosGerais domain.DadosGeraisAbate) error {

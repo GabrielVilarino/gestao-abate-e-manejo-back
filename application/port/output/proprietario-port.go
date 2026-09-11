@@ -7,5 +7,5 @@ type ProprietarioPort interface {
 	GetProprietarios() (*[]domain.Proprietario, error)
 	GetProprietarioByCPF(cpf string) (*domain.Proprietario, error)
 	UpdateProprietario(proprietario *domain.Proprietario) error
-	DeleteProprietario(id string) error
+	DeleteProprietario(id int) error
 }
