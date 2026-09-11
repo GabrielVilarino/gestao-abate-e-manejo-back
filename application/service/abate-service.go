@@ -6,14 +6,17 @@ import (
 )
 
 type AbateService struct {
-	AbatePort output.AbatePort
+	AbatePort   output.AbatePort
+	StoragePort output.StoragePort
 }
 
 func NewAbateService(
 	abatePort output.AbatePort,
+	storagePort output.StoragePort,
 ) *AbateService {
 	return &AbateService{
-		AbatePort: abatePort,
+		AbatePort:   abatePort,
+		StoragePort: storagePort,
 	}
 }
 
@@ -39,4 +42,12 @@ func (a *AbateService) UpdateEtapaFrigorifico(abateID int, etapa domain.EtapaFri
 
 func (a *AbateService) Delete(abateID int) error {
 	return a.AbatePort.Delete(abateID)
+}
+
+func (a *AbateService) UploadFotoAbate(data []byte) (string, error) {
+	return a.StoragePort.Upload(data)
+}
+
+func (a *AbateService) DownloadFotoAbate(fotoURL string) ([]byte, error) {
+	return a.StoragePort.Download(fotoURL)
 }

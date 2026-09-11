@@ -18,4 +18,6 @@ type AbateUseCase interface {
 		etapa domain.EtapaFrigorifico,
 	) error
 	Delete(abateID int) error
+	UploadFotoAbate(data []byte) (string, error)
+	DownloadFotoAbate(fotoURL string) ([]byte, error)
 }
