@@ -6,5 +6,6 @@ type FazendaUseCase interface {
 	CreateFazenda(fazenda *domain.Fazenda) error
 	GetFazendas(idProprietario int) (*[]domain.Fazenda, error)
 	UpdateFazenda(fazenda *domain.Fazenda) error
-	DeleteFazenda(id int) error
+	ActivateFazenda(id int) error
+	DeactivateFazenda(id int) error
 }

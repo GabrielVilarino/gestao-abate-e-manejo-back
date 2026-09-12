@@ -6,5 +6,6 @@ type ProprietarioUseCase interface {
 	CreateProprietario(proprietario *domain.Proprietario) error
 	GetProprietarios() (*[]domain.Proprietario, error)
 	UpdateProprietario(proprietario *domain.Proprietario) error
-	DeleteProprietario(id int) error
+	ActivateProprietario(id int) error
+	DeactivateProprietario(id int) error
 }

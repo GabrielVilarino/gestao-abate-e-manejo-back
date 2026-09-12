@@ -8,11 +8,12 @@ import (
 )
 
 type proprietarioPortStub struct {
-	create   func(*domain.Proprietario) error
-	getAll   func() (*[]domain.Proprietario, error)
-	getByCPF func(string) (*domain.Proprietario, error)
-	update   func(*domain.Proprietario) error
-	delete   func(int) error
+	create     func(*domain.Proprietario) error
+	getAll     func() (*[]domain.Proprietario, error)
+	getByCPF   func(string) (*domain.Proprietario, error)
+	update     func(*domain.Proprietario) error
+	activate   func(int) error
+	deactivate func(int) error
 }
 
 func (s proprietarioPortStub) CreateProprietario(proprietario *domain.Proprietario) error {
@@ -27,7 +28,8 @@ func (s proprietarioPortStub) GetProprietarioByCPF(cpf string) (*domain.Propriet
 func (s proprietarioPortStub) UpdateProprietario(proprietario *domain.Proprietario) error {
 	return s.update(proprietario)
 }
-func (s proprietarioPortStub) DeleteProprietario(id int) error { return s.delete(id) }
+func (s proprietarioPortStub) ActivateProprietario(id int) error   { return s.activate(id) }
+func (s proprietarioPortStub) DeactivateProprietario(id int) error { return s.deactivate(id) }
 
 func TestProprietarioServiceCreateProprietario(t *testing.T) {
 	t.Run("retorna erro da consulta", func(t *testing.T) {
@@ -127,17 +129,31 @@ func TestProprietarioServiceCRUD(t *testing.T) {
 		})
 	})
 
-	t.Run("exclui proprietario", func(t *testing.T) {
+	t.Run("ativa proprietario", func(t *testing.T) {
 		testPassthroughErrors(t, func(t *testing.T, expectedErr error) error {
 			service := NewProprietarioService(proprietarioPortStub{
-				delete: func(id int) error {
+				activate: func(id int) error {
 					if id != 42 {
 						t.Fatalf("id recebido = %d", id)
 					}
 					return expectedErr
 				},
 			})
-			return service.DeleteProprietario(42)
+			return service.ActivateProprietario(42)
+		})
+	})
+
+	t.Run("desativa proprietario", func(t *testing.T) {
+		testPassthroughErrors(t, func(t *testing.T, expectedErr error) error {
+			service := NewProprietarioService(proprietarioPortStub{
+				deactivate: func(id int) error {
+					if id != 42 {
+						t.Fatalf("id recebido = %d", id)
+					}
+					return expectedErr
+				},
+			})
+			return service.DeactivateProprietario(42)
 		})
 	})
 }

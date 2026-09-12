@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/application/domain"
@@ -47,6 +48,9 @@ func (u UserRepository) GetUsers() (*[]domain.User, error) {
 		}
 		users = append(users, user)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return &users, nil
 }
@@ -59,6 +63,9 @@ func (u UserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	user := &domain.User{}
 
 	err := row.Scan(&user.ID, &user.Nome, &user.Email, &user.Password, &user.Role, &user.Ativo)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -94,16 +101,7 @@ func (u UserRepository) ActivateUser(id int) error {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return fmt.Errorf("usuário com id %d não encontrado", id)
-	}
-
-	return nil
+	return ensureDataFound(result, id)
 }
 
 func (u UserRepository) DeactivateUser(id int) error {
@@ -114,14 +112,5 @@ func (u UserRepository) DeactivateUser(id int) error {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return fmt.Errorf("usuário com id %d não encontrado", id)
-	}
-
-	return nil
+	return ensureDataFound(result, id)
 }

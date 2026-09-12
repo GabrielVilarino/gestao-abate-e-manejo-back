@@ -34,12 +34,16 @@ func main() {
 
 	// Inicialização dos Controladores
 	userController := initUserController(db)
+	proprietarioController := initProprietarioController(db)
+	fazendaController := initFazendaController(db)
 
 	gin.SetMode(os.Getenv("GIN_MODE"))
 	router := gin.Default()
 	route.InitRoutes(
 		router,
 		userController,
+		proprietarioController,
+		fazendaController,
 	)
 
 	// Inicialização do Servidor
@@ -47,6 +51,18 @@ func main() {
 		logger.Error("Erro ao iniciar o servidor", err)
 		return
 	}
+}
+
+func initProprietarioController(db *sql.DB) *controller.ProprietarioController {
+	proprietarioPort := repository.NewProprietarioRepository(db)
+	proprietarioService := service.NewProprietarioService(proprietarioPort)
+	return controller.NewProprietarioController(proprietarioService)
+}
+
+func initFazendaController(db *sql.DB) *controller.FazendaController {
+	fazendaPort := repository.NewFazendaRepository(db)
+	fazendaService := service.NewFazendaService(fazendaPort)
+	return controller.NewFazendaController(fazendaService)
 }
 
 func initUserController(

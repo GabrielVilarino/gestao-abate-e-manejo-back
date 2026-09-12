@@ -8,6 +8,8 @@ import (
 func initRoutesv1(
 	r *gin.RouterGroup,
 	userController *controller.UserController,
+	proprietarioController *controller.ProprietarioController,
+	fazendaController *controller.FazendaController,
 ) {
 	// Rotas v1
 	v1 := r.Group("/v1")
@@ -47,6 +49,54 @@ func initRoutesv1(
 		v1.PUT(
 			"/user/deactivate/:id",
 			userController.DeactivateUser,
+		)
+	}
+
+	// Rotas de Proprietario
+	{
+		v1.POST(
+			"/proprietario",
+			proprietarioController.CreateProprietario,
+		)
+		v1.GET(
+			"/proprietarios",
+			proprietarioController.GetProprietarios,
+		)
+		v1.PUT(
+			"/proprietario",
+			proprietarioController.UpdateProprietario,
+		)
+		v1.PUT(
+			"/proprietario/activate/:id",
+			proprietarioController.ActivateProprietario,
+		)
+		v1.PUT(
+			"/proprietario/deactivate/:id",
+			proprietarioController.DeactivateProprietario,
+		)
+	}
+
+	// Rotas de Fazenda
+	{
+		v1.POST(
+			"/fazenda",
+			fazendaController.CreateFazenda,
+		)
+		v1.GET(
+			"/fazendas/:idProprietario",
+			fazendaController.GetFazendas,
+		)
+		v1.PUT(
+			"/fazenda",
+			fazendaController.UpdateFazenda,
+		)
+		v1.PUT(
+			"/fazenda/activate/:id",
+			fazendaController.ActivateFazenda,
+		)
+		v1.PUT(
+			"/fazenda/deactivate/:id",
+			fazendaController.DeactivateFazenda,
 		)
 	}
 }

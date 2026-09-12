@@ -8,10 +8,11 @@ import (
 )
 
 type fazendaPortStub struct {
-	create func(*domain.Fazenda) error
-	getAll func(int) (*[]domain.Fazenda, error)
-	update func(*domain.Fazenda) error
-	delete func(int) error
+	create     func(*domain.Fazenda) error
+	getAll     func(int) (*[]domain.Fazenda, error)
+	update     func(*domain.Fazenda) error
+	activate   func(int) error
+	deactivate func(int) error
 }
 
 func (s fazendaPortStub) CreateFazenda(fazenda *domain.Fazenda) error {
@@ -23,7 +24,8 @@ func (s fazendaPortStub) GetFazendas(idProprietario int) (*[]domain.Fazenda, err
 func (s fazendaPortStub) UpdateFazenda(fazenda *domain.Fazenda) error {
 	return s.update(fazenda)
 }
-func (s fazendaPortStub) DeleteFazenda(id int) error { return s.delete(id) }
+func (s fazendaPortStub) ActivateFazenda(id int) error   { return s.activate(id) }
+func (s fazendaPortStub) DeactivateFazenda(id int) error { return s.deactivate(id) }
 
 func TestFazendaServiceCreateFazenda(t *testing.T) {
 	fazenda := &domain.Fazenda{ID: 1, Nome: "Fazenda Um"}
@@ -75,17 +77,31 @@ func TestFazendaServiceUpdateFazenda(t *testing.T) {
 	})
 }
 
-func TestFazendaServiceDeleteFazenda(t *testing.T) {
+func TestFazendaServiceActivateFazenda(t *testing.T) {
 	testPassthroughErrors(t, func(t *testing.T, expectedErr error) error {
 		service := NewFazendaService(fazendaPortStub{
-			delete: func(id int) error {
+			activate: func(id int) error {
 				if id != 42 {
 					t.Fatalf("id recebido = %d", id)
 				}
 				return expectedErr
 			},
 		})
-		return service.DeleteFazenda(42)
+		return service.ActivateFazenda(42)
+	})
+}
+
+func TestFazendaServiceDeactivateFazenda(t *testing.T) {
+	testPassthroughErrors(t, func(t *testing.T, expectedErr error) error {
+		service := NewFazendaService(fazendaPortStub{
+			deactivate: func(id int) error {
+				if id != 42 {
+					t.Fatalf("id recebido = %d", id)
+				}
+				return expectedErr
+			},
+		})
+		return service.DeactivateFazenda(42)
 	})
 }
 

@@ -79,7 +79,7 @@ func TestUserServiceLogin(t *testing.T) {
 	})
 
 	t.Run("rejeita senha invalida", func(t *testing.T) {
-		user := domain.User{Email: "user@example.com", Password: "hash"}
+		user := domain.User{Email: "user@example.com", Password: "hash", Ativo: true}
 		service := NewUserService(userPortStub{
 			getUserByEmail: func(string) (*domain.User, error) { return &user, nil },
 		}, hashPortStub{
@@ -101,7 +101,7 @@ func TestUserServiceLogin(t *testing.T) {
 	})
 
 	t.Run("retorna erro ao gerar token", func(t *testing.T) {
-		user := domain.User{ID: 7, Email: "user@example.com", Password: "hash"}
+		user := domain.User{ID: 7, Email: "user@example.com", Password: "hash", Ativo: true}
 		expectedErr := errors.New("erro ao gerar token")
 		service := NewUserService(userPortStub{
 			getUserByEmail: func(string) (*domain.User, error) { return &user, nil },
@@ -126,7 +126,7 @@ func TestUserServiceLogin(t *testing.T) {
 	})
 
 	t.Run("retorna token", func(t *testing.T) {
-		user := domain.User{ID: 7, Email: "user@example.com", Password: "hash"}
+		user := domain.User{ID: 7, Email: "user@example.com", Password: "hash", Ativo: true}
 		service := NewUserService(userPortStub{
 			getUserByEmail: func(email string) (*domain.User, error) {
 				if email != user.Email {

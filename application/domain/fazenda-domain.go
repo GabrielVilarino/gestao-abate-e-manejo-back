@@ -7,4 +7,5 @@ type Fazenda struct {
 	InscricaoRural string
 	Observacao     string
 	IDProprietario int
+	Ativo          bool
 }

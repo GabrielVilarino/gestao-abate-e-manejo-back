@@ -10,6 +10,8 @@ import (
 func InitRoutes(
 	r *gin.Engine,
 	userController *controller.UserController,
+	proprietarioController *controller.ProprietarioController,
+	fazendaController *controller.FazendaController,
 ) {
 
 	api := r.Group("/api")
@@ -19,5 +21,5 @@ func InitRoutes(
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	})
 
-	initRoutesv1(api, userController)
+	initRoutesv1(api, userController, proprietarioController, fazendaController)
 }

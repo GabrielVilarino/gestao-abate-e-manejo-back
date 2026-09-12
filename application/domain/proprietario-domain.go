@@ -5,4 +5,5 @@ type Proprietario struct {
 	Nome       string
 	CPF        string
 	Observacao string
+	Ativo      bool
 }

@@ -29,6 +29,10 @@ func (f *FazendaService) UpdateFazenda(fazenda *domain.Fazenda) error {
 	return f.FazendaPort.UpdateFazenda(fazenda)
 }
 
-func (f *FazendaService) DeleteFazenda(id int) error {
-	return f.FazendaPort.DeleteFazenda(id)
+func (f *FazendaService) ActivateFazenda(id int) error {
+	return f.FazendaPort.ActivateFazenda(id)
+}
+
+func (f *FazendaService) DeactivateFazenda(id int) error {
+	return f.FazendaPort.DeactivateFazenda(id)
 }
