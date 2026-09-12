@@ -28,7 +28,7 @@ func (u *UserService) Login(email, password string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if userData == nil {
+	if userData == nil || !userData.Ativo {
 		return nil, domain.ErrInvalidCredentials
 	}
 
@@ -70,6 +70,10 @@ func (u *UserService) UpdateUser(user *domain.User) error {
 	return u.UserPort.UpdateUser(user)
 }
 
-func (u *UserService) DeleteUser(id int) error {
-	return u.UserPort.DeleteUser(id)
+func (u *UserService) ActivateUser(id int) error {
+	return u.UserPort.ActivateUser(id)
+}
+
+func (u *UserService) DeactivateUser(id int) error {
+	return u.UserPort.DeactivateUser(id)
 }

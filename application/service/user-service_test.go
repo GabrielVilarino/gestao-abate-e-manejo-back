@@ -13,7 +13,8 @@ type userPortStub struct {
 	getUsers       func() (*[]domain.User, error)
 	getUserByEmail func(string) (*domain.User, error)
 	updateUser     func(*domain.User) error
-	deleteUser     func(int) error
+	activateUser   func(int) error
+	deactivateUser func(int) error
 }
 
 func (s userPortStub) CreateUser(user *domain.User) error { return s.createUser(user) }
@@ -22,7 +23,8 @@ func (s userPortStub) GetUserByEmail(email string) (*domain.User, error) {
 	return s.getUserByEmail(email)
 }
 func (s userPortStub) UpdateUser(user *domain.User) error { return s.updateUser(user) }
-func (s userPortStub) DeleteUser(id int) error            { return s.deleteUser(id) }
+func (s userPortStub) ActivateUser(id int) error          { return s.activateUser(id) }
+func (s userPortStub) DeactivateUser(id int) error        { return s.deactivateUser(id) }
 
 type hashPortStub struct {
 	hash    func(string) (string, error)
@@ -39,7 +41,7 @@ type tokenPortStub struct {
 }
 
 func (s tokenPortStub) Generate(user domain.User) (string, error) { return s.generate(user) }
-func (s tokenPortStub) Validate(string) (string, error)           { panic("unexpected call") }
+func (s tokenPortStub) Validate(string) (*domain.User, error)     { panic("unexpected call") }
 
 func TestUserServiceLogin(t *testing.T) {
 	t.Run("retorna erro da consulta", func(t *testing.T) {
@@ -292,14 +294,14 @@ func TestUserServiceCRUD(t *testing.T) {
 	t.Run("exclui usuario", func(t *testing.T) {
 		testPassthroughErrors(t, func(t *testing.T, expectedErr error) error {
 			service := NewUserService(userPortStub{
-				deleteUser: func(id int) error {
+				deactivateUser: func(id int) error {
 					if id != 42 {
 						t.Fatalf("id recebido = %d", id)
 					}
 					return expectedErr
 				},
 			}, hashPortStub{}, tokenPortStub{})
-			return service.DeleteUser(42)
+			return service.DeactivateUser(42)
 		})
 	})
 }

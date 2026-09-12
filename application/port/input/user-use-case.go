@@ -7,5 +7,6 @@ type UserUseCase interface {
 	CreateUser(user *domain.User) error
 	GetUsers() (*[]domain.User, error)
 	UpdateUser(user *domain.User) error
-	DeleteUser(id int) error
+	ActivateUser(id int) error
+	DeactivateUser(id int) error
 }

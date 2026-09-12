@@ -7,5 +7,6 @@ type UserPort interface {
 	GetUsers() (*[]domain.User, error)
 	GetUserByEmail(email string) (*domain.User, error)
 	UpdateUser(user *domain.User) error
-	DeleteUser(id int) error
+	ActivateUser(id int) error
+	DeactivateUser(id int) error
 }

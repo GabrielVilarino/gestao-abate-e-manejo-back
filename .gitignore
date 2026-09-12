@@ -1,0 +1,4 @@
+.env
+ddl.sql
+.air.toml
+go.sum
