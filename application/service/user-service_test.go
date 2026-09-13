@@ -22,9 +22,10 @@ func (s userPortStub) GetUsers() (*[]domain.User, error)  { return s.getUsers() 
 func (s userPortStub) GetUserByEmail(email string) (*domain.User, error) {
 	return s.getUserByEmail(email)
 }
-func (s userPortStub) UpdateUser(user *domain.User) error { return s.updateUser(user) }
-func (s userPortStub) ActivateUser(id int) error          { return s.activateUser(id) }
-func (s userPortStub) DeactivateUser(id int) error        { return s.deactivateUser(id) }
+func (s userPortStub) GetUserByID(int) (*domain.User, error) { return nil, nil }
+func (s userPortStub) UpdateUser(user *domain.User) error    { return s.updateUser(user) }
+func (s userPortStub) ActivateUser(id int) error             { return s.activateUser(id) }
+func (s userPortStub) DeactivateUser(id int) error           { return s.deactivateUser(id) }
 
 type hashPortStub struct {
 	hash    func(string) (string, error)

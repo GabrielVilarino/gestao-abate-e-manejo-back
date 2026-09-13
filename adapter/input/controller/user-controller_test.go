@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -102,18 +104,35 @@ func TestUserControllerLogoutExpiresCookie(t *testing.T) {
 }
 
 func TestUserControllerCreateUser(t *testing.T) {
-	t.Run("cria usuario ativo", func(t *testing.T) {
+	for _, role := range []int{domain.RoleAdmin, domain.RoleUser} {
+		t.Run("cria usuario ativo com perfil "+strconv.Itoa(role), func(t *testing.T) {
+			controller := NewUserController(userUseCaseStub{
+				create: func(user *domain.User) error {
+					if user.Nome != "Maria" || user.Email != "maria@example.com" || user.Password != "senha" || user.Role != role || !user.Ativo {
+						t.Fatalf("usuário recebido = %+v", user)
+					}
+					return nil
+				},
+			})
+			body := fmt.Sprintf(`{"nome":"Maria","email":"maria@example.com","password":"senha","role":%d}`, role)
+			w, c := userControllerContext(http.MethodPost, body)
+			controller.CreateUser(c)
+			if w.Code != http.StatusOK {
+				t.Fatalf("status = %d, body = %s", w.Code, w.Body.String())
+			}
+		})
+	}
+
+	t.Run("rejeita perfil fora da política", func(t *testing.T) {
 		controller := NewUserController(userUseCaseStub{
-			create: func(user *domain.User) error {
-				if user.Nome != "Maria" || user.Email != "maria@example.com" || user.Password != "senha" || user.Role != 2 || !user.Ativo {
-					t.Fatalf("usuário recebido = %+v", user)
-				}
+			create: func(*domain.User) error {
+				t.Fatal("use case não deveria ser chamado")
 				return nil
 			},
 		})
-		w, c := userControllerContext(http.MethodPost, `{"nome":"Maria","email":"maria@example.com","password":"senha","role":2}`)
+		w, c := userControllerContext(http.MethodPost, `{"nome":"Maria","email":"maria@example.com","password":"senha","role":3}`)
 		controller.CreateUser(c)
-		if w.Code != http.StatusOK {
+		if w.Code != http.StatusBadRequest {
 			t.Fatalf("status = %d, body = %s", w.Code, w.Body.String())
 		}
 	})
@@ -208,15 +227,29 @@ func TestUserControllerUpdateUser(t *testing.T) {
 	t.Run("atualiza campos recebidos", func(t *testing.T) {
 		controller := NewUserController(userUseCaseStub{
 			update: func(user *domain.User) error {
-				if user.ID != 7 || user.Nome != "Novo Nome" || user.Email != "novo@example.com" || user.Role != 3 {
+				if user.ID != 7 || user.Nome != "Novo Nome" || user.Email != "novo@example.com" || user.Role != domain.RoleUser {
 					t.Fatalf("usuário recebido = %+v", user)
 				}
 				return nil
 			},
 		})
-		w, c := userControllerContext(http.MethodPut, `{"id":7,"nome":"Novo Nome","email":"novo@example.com","role":3}`)
+		w, c := userControllerContext(http.MethodPut, `{"id":7,"nome":"Novo Nome","email":"novo@example.com","role":2}`)
 		controller.UpdateUser(c)
 		if w.Code != http.StatusOK {
+			t.Fatalf("status = %d, body = %s", w.Code, w.Body.String())
+		}
+	})
+
+	t.Run("rejeita perfil fora da política", func(t *testing.T) {
+		controller := NewUserController(userUseCaseStub{
+			update: func(*domain.User) error {
+				t.Fatal("use case não deveria ser chamado")
+				return nil
+			},
+		})
+		w, c := userControllerContext(http.MethodPut, `{"id":7,"nome":"Novo Nome","email":"novo@example.com","role":3}`)
+		controller.UpdateUser(c)
+		if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), domain.ErrUpdateUser.Error()) {
 			t.Fatalf("status = %d, body = %s", w.Code, w.Body.String())
 		}
 	})
@@ -239,7 +272,7 @@ func TestUserControllerUpdateUser(t *testing.T) {
 		controller := NewUserController(userUseCaseStub{
 			update: func(*domain.User) error { return errors.New("falha interna") },
 		})
-		w, c := userControllerContext(http.MethodPut, `{"id":7,"nome":"Novo Nome","email":"novo@example.com","role":3}`)
+		w, c := userControllerContext(http.MethodPut, `{"id":7,"nome":"Novo Nome","email":"novo@example.com","role":2}`)
 		controller.UpdateUser(c)
 		if w.Code != http.StatusInternalServerError || !strings.Contains(w.Body.String(), domain.ErrUpdateUser.Error()) {
 			t.Fatalf("status = %d, body = %s", w.Code, w.Body.String())

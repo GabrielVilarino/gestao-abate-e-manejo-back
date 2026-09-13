@@ -95,7 +95,6 @@ func (f *FazendaController) UpdateFazenda(c *gin.Context) {
 		Cidade:         requestData.Cidade,
 		InscricaoRural: requestData.InscricaoRural,
 		Observacao:     requestData.Observacao,
-		IDProprietario: requestData.IDProprietario,
 	}
 	if err := f.FazendaUseCase.UpdateFazenda(fazenda); err != nil {
 		logger.Error("[FAZENDA] - UpdateFazenda", err)

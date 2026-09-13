@@ -1,5 +1,12 @@
 package domain
 
+import "time"
+
+const (
+	EtapaFazendaFoto     = "FAZENDA"
+	EtapaFrigorificoFoto = "FRIGORIFICO"
+)
+
 type QtdDenticao struct {
 	QtdDenticao int
 	QtdAnimais  int
@@ -7,33 +14,46 @@ type QtdDenticao struct {
 
 type AcabamentoCarcaca struct {
 	Acabamento string
-	QtdAnimais float64
+	QtdAnimais int
 }
 
 type ClassificacaoFrigorifico struct {
 	Classificacao string
-	QtdAnimais    float64
+	QtdAnimais    int
 }
 
 type DistribuicaoPeso struct {
 	Classificacao string
-	QtdAnimais    float64
+	QtdAnimais    int
 	PesoTotal     float64
 }
 
+type FotoAbate struct {
+	ID           int
+	AbateID      int
+	Etapa        string
+	ObjectKey    string
+	NomeOriginal string
+	ContentType  string
+	Tamanho      int64
+	SHA256       string
+}
+
 type DadosGeraisAbate struct {
-	DataAbate        string
-	FazendaID        int
-	NomeFrigorifico  string
-	CategoriaAnimal  string
-	PrecoFunrural    float64
-	PrecoSemFunrural float64
+	DataAbate            time.Time
+	FazendaID            int
+	NumeroLote           int
+	NomeFrigorifico      string
+	DistanciaFrigorifico float64
+	CategoriaAnimal      string
+	PrecoFunrural        float64
+	PrecoSemFunrural     float64
 }
 
 type EtapaFazenda struct {
 	QuantidadeAnimal []QtdDenticao
 	PesoTotal        float64
-	Fotos            []string
+	Fotos            []FotoAbate
 }
 
 type EtapaFrigorifico struct {
@@ -42,12 +62,30 @@ type EtapaFrigorifico struct {
 	AcabamentoCarcaca        []AcabamentoCarcaca
 	ClassificacaoFrigorifico []ClassificacaoFrigorifico
 	DistribuicaoPeso         []DistribuicaoPeso
-	Fotos                    []string
+	Fotos                    []FotoAbate
 }
 
 type Abate struct {
 	ID               int
+	ProprietarioID   int
+	NomeProprietario string
+	NomeFazenda      string
 	DadosGeraisAbate DadosGeraisAbate
 	EtapaFazenda     EtapaFazenda
 	EtapaFrigorifico EtapaFrigorifico
+}
+
+type FiltroAbate struct {
+	ProprietarioID *int
+	FazendaID      *int
+	NumeroLote     *int
+	DataInicio     *time.Time
+	DataFim        *time.Time
+	Limit          int
+	Offset         int
+}
+
+type ContextoFotoAbate struct {
+	ProprietarioID int
+	NumeroLote     int
 }

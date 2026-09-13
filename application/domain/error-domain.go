@@ -24,4 +24,24 @@ var (
 	ErrActivateFazenda     = errors.New("Erro ao ativar fazenda")
 	ErrDeactivateFazenda   = errors.New("Erro ao desativar fazenda")
 	ErrProprietarioInativo = errors.New("Não é possível ativar a fazenda porque o proprietário está inativo")
+
+	// Abate errors
+	ErrAbateNaoEncontrado  = errors.New("Abate não encontrado")
+	ErrFotoNaoEncontrada   = errors.New("Foto não encontrada")
+	ErrPeriodoInvalido     = errors.New("Data inicial não pode ser maior que a data final")
+	ErrEtapaFotoInvalida   = errors.New("Etapa da foto inválida")
+	ErrFormatoFotoInvalido = errors.New("Formato de foto inválido; envie PNG ou JPG")
+	ErrTamanhoFotoInvalido = errors.New("A foto deve ter no máximo 10 MB")
+	ErrDadosGeraisComFotos = errors.New("Não é possível alterar fazenda ou número do lote após o envio de fotos")
+
+	// Agenda and push errors
+	ErrAgendaNaoEncontrada     = errors.New("Agendamento não encontrado")
+	ErrPeriodoAgendaInvalido   = errors.New("Data inicial não pode ser maior que a data final")
+	ErrHorarioAgendaInvalido   = errors.New("Data e hora do agendamento inválida")
+	ErrFazendaAgendaInvalida   = errors.New("Fazenda do agendamento inválida")
+	ErrAssinaturaPushInvalida  = errors.New("Assinatura push inválida")
+	ErrAssinaturaNaoEncontrada = errors.New("Assinatura push não encontrada")
+	ErrPushSubscriptionGone    = errors.New("assinatura push expirada ou inválida")
+	ErrAgendaEmProcessamento   = errors.New("Agendamento está sendo processado; tente novamente em instantes")
+	ErrNotificationLeaseLost   = errors.New("posse da notificação expirada")
 )

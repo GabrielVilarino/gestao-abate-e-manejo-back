@@ -128,31 +128,21 @@ func TestFazendaControllerRejectsNegativeOwnerIDOnCreate(t *testing.T) {
 	}
 }
 
-func TestFazendaControllerRejectsNegativeIDsOnUpdate(t *testing.T) {
-	tests := []struct {
-		name string
-		body string
-	}{
-		{name: "id da fazenda", body: `{"id":-1,"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":7}`},
-		{name: "id do proprietario", body: `{"id":11,"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":-1}`},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			controller := NewFazendaController(fazendaUseCaseStub{
-				update: func(*domain.Fazenda) error {
-					t.Fatal("use case não deveria ser chamado")
-					return nil
-				},
-			})
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Request = httptest.NewRequest(http.MethodPut, "/", bytes.NewBufferString(tc.body))
-			c.Request.Header.Set("Content-Type", "application/json")
-			controller.UpdateFazenda(c)
-			if w.Code != http.StatusBadRequest {
-				t.Fatalf("status = %d, esperado %d; body=%s", w.Code, http.StatusBadRequest, w.Body.String())
+func TestFazendaControllerUpdateDoesNotAcceptOwnerChange(t *testing.T) {
+	controller := NewFazendaController(fazendaUseCaseStub{
+		update: func(fazenda *domain.Fazenda) error {
+			if fazenda.IDProprietario != 0 {
+				t.Fatalf("proprietário não deve fazer parte da atualização: %d", fazenda.IDProprietario)
 			}
-		})
+			return nil
+		},
+	})
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPut, "/", bytes.NewBufferString(`{"id":11,"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":99}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+	controller.UpdateFazenda(c)
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, body=%s", w.Code, w.Body.String())
 	}
 }

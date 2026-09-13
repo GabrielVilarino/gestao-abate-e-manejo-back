@@ -10,6 +10,11 @@ func initRoutesv1(
 	userController *controller.UserController,
 	proprietarioController *controller.ProprietarioController,
 	fazendaController *controller.FazendaController,
+	abateController *controller.AbateController,
+	agendaController *controller.AgendaController,
+	authMiddleware gin.HandlerFunc,
+	adminMiddleware gin.HandlerFunc,
+	adminOrUserMiddleware gin.HandlerFunc,
 ) {
 	// Rotas v1
 	v1 := r.Group("/v1")
@@ -23,30 +28,34 @@ func initRoutesv1(
 
 		v1.POST(
 			"/user/logout",
+			authMiddleware,
+			adminOrUserMiddleware,
 			userController.Logout,
 		)
 
-		v1.POST(
+		users := v1.Group("")
+		users.Use(authMiddleware, adminMiddleware)
+		users.POST(
 			"/user",
 			userController.CreateUser,
 		)
 
-		v1.GET(
+		users.GET(
 			"/users",
 			userController.GetUsers,
 		)
 
-		v1.PUT(
+		users.PUT(
 			"/user",
 			userController.UpdateUser,
 		)
 
-		v1.PUT(
+		users.PUT(
 			"/user/activate/:id",
 			userController.ActivateUser,
 		)
 
-		v1.PUT(
+		users.PUT(
 			"/user/deactivate/:id",
 			userController.DeactivateUser,
 		)
@@ -54,23 +63,25 @@ func initRoutesv1(
 
 	// Rotas de Proprietario
 	{
-		v1.POST(
+		proprietarios := v1.Group("")
+		proprietarios.Use(authMiddleware, adminOrUserMiddleware)
+		proprietarios.POST(
 			"/proprietario",
 			proprietarioController.CreateProprietario,
 		)
-		v1.GET(
+		proprietarios.GET(
 			"/proprietarios",
 			proprietarioController.GetProprietarios,
 		)
-		v1.PUT(
+		proprietarios.PUT(
 			"/proprietario",
 			proprietarioController.UpdateProprietario,
 		)
-		v1.PUT(
+		proprietarios.PUT(
 			"/proprietario/activate/:id",
 			proprietarioController.ActivateProprietario,
 		)
-		v1.PUT(
+		proprietarios.PUT(
 			"/proprietario/deactivate/:id",
 			proprietarioController.DeactivateProprietario,
 		)
@@ -78,25 +89,111 @@ func initRoutesv1(
 
 	// Rotas de Fazenda
 	{
-		v1.POST(
+		fazendas := v1.Group("")
+		fazendas.Use(authMiddleware, adminOrUserMiddleware)
+		fazendas.POST(
 			"/fazenda",
 			fazendaController.CreateFazenda,
 		)
-		v1.GET(
+		fazendas.GET(
 			"/fazendas/:idProprietario",
 			fazendaController.GetFazendas,
 		)
-		v1.PUT(
+		fazendas.PUT(
 			"/fazenda",
 			fazendaController.UpdateFazenda,
 		)
-		v1.PUT(
+		fazendas.PUT(
 			"/fazenda/activate/:id",
 			fazendaController.ActivateFazenda,
 		)
-		v1.PUT(
+		fazendas.PUT(
 			"/fazenda/deactivate/:id",
 			fazendaController.DeactivateFazenda,
+		)
+	}
+
+	// Rotas de Abate
+	{
+		abate := v1.Group("")
+		abate.Use(authMiddleware, adminOrUserMiddleware)
+		abate.POST(
+			"/abate",
+			abateController.CreateAbate,
+		)
+		abate.GET(
+			"/abate/:id",
+			abateController.FindAbateByID,
+		)
+		abate.GET(
+			"/abates",
+			abateController.FindAbates,
+		)
+		abate.PUT(
+			"/abate/:id/dados-gerais",
+			abateController.UpdateDadosGeraisAbate,
+		)
+		abate.PUT(
+			"/abate/:id/etapa-fazenda",
+			abateController.UpdateEtapaFazenda,
+		)
+		abate.PUT(
+			"/abate/:id/etapa-frigorifico",
+			abateController.UpdateEtapaFrigorifico,
+		)
+		abate.DELETE(
+			"/abate/:id",
+			adminMiddleware,
+			abateController.DeleteAbate,
+		)
+		abate.POST(
+			"/abate/:id/fotos/:etapa",
+			abateController.UploadFotoAbate,
+		)
+		abate.GET(
+			"/abate/fotos/:fotoID",
+			abateController.DownloadFotoAbate,
+		)
+		abate.DELETE(
+			"/abate/fotos/:fotoID",
+			adminMiddleware,
+			abateController.DeleteFotoAbate,
+		)
+	}
+
+	// Rotas de Agenda e assinaturas Web Push
+	{
+		agenda := v1.Group("")
+		agenda.Use(authMiddleware, adminOrUserMiddleware)
+		agenda.POST(
+			"/agenda",
+			agendaController.CreateAgenda,
+		)
+		agenda.GET(
+			"/agenda/:id",
+			agendaController.GetAgenda,
+		)
+		agenda.GET(
+			"/agendas",
+			agendaController.FindAgendas,
+		)
+		agenda.PUT(
+			"/agenda/:id",
+			agendaController.UpdateAgenda,
+		)
+		agenda.DELETE(
+			"/agenda/:id",
+			adminMiddleware,
+			agendaController.DeleteAgenda,
+		)
+		agenda.POST(
+			"/push/subscriptions",
+			agendaController.CreatePushSubscription,
+		)
+		agenda.DELETE(
+			"/push/subscriptions/:id",
+			adminMiddleware,
+			agendaController.DeletePushSubscription,
 		)
 	}
 }

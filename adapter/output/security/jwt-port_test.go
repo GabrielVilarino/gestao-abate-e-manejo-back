@@ -13,7 +13,7 @@ import (
 func TestJWTPortGenerateAndValidate(t *testing.T) {
 	t.Setenv("JWT_SECRET", "segredo-de-teste")
 	port := NewTokenPort()
-	user := domain.User{ID: 7, Nome: "Maria", Email: "maria@example.com", Role: 3, Ativo: true}
+	user := domain.User{ID: 7, Nome: "Maria", Email: "maria@example.com", Role: domain.RoleUser, Ativo: true}
 	before := time.Now()
 
 	tokenString, err := port.Generate(user)

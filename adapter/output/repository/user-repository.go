@@ -73,6 +73,19 @@ func (u UserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	return user, nil
 }
 
+func (u UserRepository) GetUserByID(id int) (*domain.User, error) {
+	user := &domain.User{}
+	err := u.db.QueryRow(`SELECT id, nome, email, senha, role, ativo FROM public.usuario WHERE id = $1`, id).
+		Scan(&user.ID, &user.Nome, &user.Email, &user.Password, &user.Role, &user.Ativo)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (u UserRepository) UpdateUser(user *domain.User) error {
 	query := `UPDATE public.usuario SET nome = $1, email = $2, role = $3 WHERE id = $4`
 

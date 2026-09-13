@@ -1,5 +1,10 @@
 package domain
 
+const (
+	RoleAdmin = 1
+	RoleUser  = 2
+)
+
 type User struct {
 	ID       int
 	Nome     string

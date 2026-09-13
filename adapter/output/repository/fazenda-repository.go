@@ -61,16 +61,8 @@ func (f FazendaRepository) GetFazendas(idProprietario int) (*[]domain.Fazenda, e
 }
 
 func (f FazendaRepository) UpdateFazenda(fazenda *domain.Fazenda) error {
-	query := `UPDATE public.fazenda SET nome = $1, cidade = $2, inscricao_rural = $3, observacao = $4, id_proprietario = $5 WHERE id = $6`
-	result, err := f.db.Exec(
-		query,
-		fazenda.Nome,
-		fazenda.Cidade,
-		fazenda.InscricaoRural,
-		fazenda.Observacao,
-		fazenda.IDProprietario,
-		fazenda.ID,
-	)
+	query := `UPDATE public.fazenda SET nome = $1, cidade = $2, inscricao_rural = $3, observacao = $4 WHERE id = $5`
+	result, err := f.db.Exec(query, fazenda.Nome, fazenda.Cidade, fazenda.InscricaoRural, fazenda.Observacao, fazenda.ID)
 	if err != nil {
 		return err
 	}

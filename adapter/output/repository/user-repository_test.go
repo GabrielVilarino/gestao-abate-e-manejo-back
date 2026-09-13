@@ -150,8 +150,21 @@ func TestUserRepositoryGetUserByEmail(t *testing.T) {
 	})
 }
 
+func TestUserRepositoryGetUserByIDForSessionValidation(t *testing.T) {
+	db, mock := newUserRepositoryMock(t)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, nome, email, senha, role, ativo FROM public.usuario WHERE id = $1`)).
+		WithArgs(7).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "nome", "email", "senha", "role", "ativo"}).
+			AddRow(7, "Admin", "admin@example.com", "hash", domain.RoleAdmin, true))
+	user, err := NewUserRepository(db).GetUserByID(7)
+	if err != nil || user == nil || user.Role != domain.RoleAdmin || !user.Ativo {
+		t.Fatalf("user=%+v err=%v", user, err)
+	}
+	assertUserRepositoryExpectations(t, mock)
+}
+
 func TestUserRepositoryMutations(t *testing.T) {
-	user := &domain.User{ID: 7, Nome: "Novo Nome", Email: "novo@example.com", Role: 3}
+	user := &domain.User{ID: 7, Nome: "Novo Nome", Email: "novo@example.com", Role: domain.RoleUser}
 	tests := []struct {
 		name   string
 		query  string

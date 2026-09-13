@@ -14,5 +14,4 @@ type FazendaUpdateRequest struct {
 	Cidade         string `json:"cidade" binding:"required"`
 	InscricaoRural string `json:"inscricao_rural" binding:"required"`
 	Observacao     string `json:"observacao"`
-	IDProprietario int    `json:"id_proprietario" binding:"required,gt=0"`
 }

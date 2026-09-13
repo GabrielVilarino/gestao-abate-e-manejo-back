@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/input/controller"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/input/route"
+	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/notification"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/repository"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/security"
+	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/storage"
+	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/application/port/output"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/application/service"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/configuration/database"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/configuration/logger"
@@ -33,9 +38,23 @@ func main() {
 	defer db.Close()
 
 	// Inicialização dos Controladores
-	userController := initUserController(db)
+	tokenPort := security.NewTokenPort()
+	userPort := repository.NewUserRepository(db)
+	userController := initUserController(userPort, tokenPort)
 	proprietarioController := initProprietarioController(db)
 	fazendaController := initFazendaController(db)
+	cleanupCtx, stopCleanup := context.WithCancel(context.Background())
+	defer stopCleanup()
+	abateController, err := initAbateController(db, cleanupCtx)
+	if err != nil {
+		logger.Error("Erro ao configurar armazenamento R2", err)
+		return
+	}
+	agendaController, err := initAgendaController(db, cleanupCtx)
+	if err != nil {
+		logger.Error("Erro ao configurar notificações de agenda", err)
+		return
+	}
 
 	gin.SetMode(os.Getenv("GIN_MODE"))
 	router := gin.Default()
@@ -44,6 +63,10 @@ func main() {
 		userController,
 		proprietarioController,
 		fazendaController,
+		abateController,
+		agendaController,
+		tokenPort,
+		userPort,
 	)
 
 	// Inicialização do Servidor
@@ -51,6 +74,37 @@ func main() {
 		logger.Error("Erro ao iniciar o servidor", err)
 		return
 	}
+}
+
+func initAgendaController(db *sql.DB, workerCtx context.Context) (*controller.AgendaController, error) {
+	agendaPort := repository.NewAgendaRepository(db)
+	pushSender, err := notification.NewWebPushSender(
+		os.Getenv("VAPID_PUBLIC_KEY"),
+		os.Getenv("VAPID_PRIVATE_KEY"),
+		os.Getenv("VAPID_SUBJECT"),
+	)
+	if err != nil {
+		return nil, err
+	}
+	agendaService := service.NewAgendaNotificationService(agendaPort, agendaPort, pushSender)
+	agendaService.StartNotificationWorker(workerCtx, time.Minute)
+	return controller.NewAgendaController(agendaService), nil
+}
+
+func initAbateController(db *sql.DB, cleanupCtx context.Context) (*controller.AbateController, error) {
+	storagePort, err := storage.NewR2Storage(
+		os.Getenv("R2_BASE_URL"),
+		os.Getenv("R2_ACCESS_KEY"),
+		os.Getenv("R2_SECRET_KEY"),
+		os.Getenv("R2_BUCKET_NAME"),
+	)
+	if err != nil {
+		return nil, err
+	}
+	abatePort := repository.NewAbateRepository(db)
+	abateService := service.NewAbateService(abatePort, storagePort)
+	abateService.StartStorageCleanupWorker(cleanupCtx, time.Minute)
+	return controller.NewAbateController(abateService), nil
 }
 
 func initProprietarioController(db *sql.DB) *controller.ProprietarioController {
@@ -66,11 +120,10 @@ func initFazendaController(db *sql.DB) *controller.FazendaController {
 }
 
 func initUserController(
-	db *sql.DB,
+	userPort output.UserPort,
+	tokenPort output.TokenPort,
 ) *controller.UserController {
-	userPort := repository.NewUserRepository(db)
 	hashPort := security.NewHashPort()
-	tokenPort := security.NewTokenPort()
 
 	service := service.NewUserService(
 		userPort,
