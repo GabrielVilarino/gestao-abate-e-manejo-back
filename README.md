@@ -97,6 +97,8 @@ go run .
 
 Com o exemplo de configuração, a API estará em `http://localhost:8080` e o health check em `GET /api/health`.
 
+A geração dos relatórios PDF de abate usa `chromedp` e requer uma instalação do Chrome ou Chromium acessível no ambiente em que a API estiver em execução. Os valores permitidos para dentição, acabamento de carcaça, classificação do frigorífico e distribuição de peso estão documentados em [API_ROUTES.md](API_ROUTES.md).
+
 Para desenvolvimento com recarregamento, o projeto também inclui a configuração [.air.toml](.air.toml), compatível com o Air:
 
 ```powershell

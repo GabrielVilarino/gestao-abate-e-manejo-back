@@ -134,6 +134,28 @@ func (a *AbateController) FindAbates(c *gin.Context) {
 	c.JSON(http.StatusOK, response.GetAbatesResponse{Abates: data, Pagina: paginaAtual, Limite: filtro.Limit})
 }
 
+func (a *AbateController) GenerateAbateReport(c *gin.Context) {
+	requestData := &request.AbateReportRequest{}
+	if err := c.ShouldBindJSON(requestData); err != nil {
+		c.JSON(http.StatusBadRequest, response.AbateErrorResponse{Error: err.Error()})
+		return
+	}
+	pdf, err := a.AbateUseCase.GenerateAbateReport(c.Request.Context(), requestData.AbateIDs)
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrListaAbatesInvalida):
+			c.JSON(http.StatusBadRequest, response.AbateErrorResponse{Error: err.Error()})
+		case errors.Is(err, domain.ErrAbateNaoEncontrado):
+			c.JSON(http.StatusNotFound, response.AbateErrorResponse{Error: err.Error()})
+		default:
+			a.internalError(c, "GenerateAbateReport", err)
+		}
+		return
+	}
+	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": "relatorio-abates.pdf"}))
+	c.Data(http.StatusOK, "application/pdf", pdf)
+}
+
 func (a *AbateController) UpdateDadosGeraisAbate(c *gin.Context) {
 	id, ok := positiveParam(c, "id")
 	if !ok {
@@ -353,13 +375,14 @@ func requestToDadosGerais(value request.DadosGeraisAbateRequest) (domain.DadosGe
 		NomeFrigorifico: value.NomeFrigorifico, DistanciaFrigorifico: value.DistanciaFrigorifico,
 		CategoriaAnimal: value.CategoriaAnimal, PrecoFunrural: value.PrecoFunrural,
 		PrecoSemFunrural: value.PrecoSemFunrural,
+		Observacao:       value.Observacao,
 	}, nil
 }
 
 func requestToEtapaFazenda(value request.EtapaFazendaRequest) domain.EtapaFazenda {
 	etapa := domain.EtapaFazenda{PesoTotal: value.PesoTotal, QuantidadeAnimal: make([]domain.QtdDenticao, len(value.QuantidadeAnimal))}
 	for i, item := range value.QuantidadeAnimal {
-		etapa.QuantidadeAnimal[i] = domain.QtdDenticao{QtdDenticao: item.QtdDenticao, QtdAnimais: item.QtdAnimais}
+		etapa.QuantidadeAnimal[i] = domain.QtdDenticao{QtdDenticao: *item.QtdDenticao, QtdAnimais: item.QtdAnimais}
 	}
 	return etapa
 }
@@ -395,6 +418,7 @@ func abateResponse(value domain.Abate) response.AbateDataResponse {
 			CategoriaAnimal:      value.DadosGeraisAbate.CategoriaAnimal,
 			PrecoFunrural:        value.DadosGeraisAbate.PrecoFunrural,
 			PrecoSemFunrural:     value.DadosGeraisAbate.PrecoSemFunrural,
+			Observacao:           value.DadosGeraisAbate.Observacao,
 		},
 		EtapaFazenda: response.EtapaFazendaResponse{
 			PesoTotal:        value.EtapaFazenda.PesoTotal,

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/input/controller"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/input/route"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/notification"
+	reportadapter "github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/report"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/repository"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/security"
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/adapter/output/storage"
@@ -20,6 +22,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+//go:embed relatorio_html.html
+var abateReportReferenceHTML []byte
 
 func main() {
 	logger.Info("==> Iniciando Servidor <==")
@@ -102,7 +107,11 @@ func initAbateController(db *sql.DB, cleanupCtx context.Context) (*controller.Ab
 		return nil, err
 	}
 	abatePort := repository.NewAbateRepository(db)
-	abateService := service.NewAbateService(abatePort, storagePort)
+	reportGenerator, err := reportadapter.NewChromedpPDFGenerator(abateReportReferenceHTML)
+	if err != nil {
+		return nil, err
+	}
+	abateService := service.NewAbateService(abatePort, storagePort, reportGenerator)
 	abateService.StartStorageCleanupWorker(cleanupCtx, time.Minute)
 	return controller.NewAbateController(abateService), nil
 }

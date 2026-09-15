@@ -129,6 +129,10 @@ func initRoutesv1(
 			"/abates",
 			abateController.FindAbates,
 		)
+		abate.POST(
+			"/abates/relatorio",
+			abateController.GenerateAbateReport,
+		)
 		abate.PUT(
 			"/abate/:id/dados-gerais",
 			abateController.UpdateDadosGeraisAbate,

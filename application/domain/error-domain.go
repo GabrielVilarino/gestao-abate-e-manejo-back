@@ -33,6 +33,7 @@ var (
 	ErrFormatoFotoInvalido = errors.New("Formato de foto inválido; envie PNG ou JPG")
 	ErrTamanhoFotoInvalido = errors.New("A foto deve ter no máximo 10 MB")
 	ErrDadosGeraisComFotos = errors.New("Não é possível alterar fazenda ou número do lote após o envio de fotos")
+	ErrListaAbatesInvalida = errors.New("Informe ao menos um abate para gerar o relatório")
 
 	// Agenda and push errors
 	ErrAgendaNaoEncontrada     = errors.New("Agendamento não encontrado")

@@ -18,4 +18,5 @@ type AbateUseCase interface {
 	UploadFotoAbate(ctx context.Context, abateID int, etapa, nomeOriginal string, data []byte) (*domain.FotoAbate, error)
 	DownloadFotoAbate(ctx context.Context, fotoID int) (*domain.FotoAbate, io.ReadCloser, error)
 	DeleteFotoAbate(ctx context.Context, fotoID int) error
+	GenerateAbateReport(ctx context.Context, abateIDs []int) ([]byte, error)
 }

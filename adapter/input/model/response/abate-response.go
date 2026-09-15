@@ -48,6 +48,7 @@ type DadosGeraisAbateResponse struct {
 	CategoriaAnimal      string  `json:"categoria_animal"`
 	PrecoFunrural        float64 `json:"preco_funrural"`
 	PrecoSemFunrural     float64 `json:"preco_sem_funrural"`
+	Observacao           *string `json:"observacao"`
 }
 
 type EtapaFazendaResponse struct {

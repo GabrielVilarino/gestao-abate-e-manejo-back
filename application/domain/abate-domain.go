@@ -5,7 +5,63 @@ import "time"
 const (
 	EtapaFazendaFoto     = "FAZENDA"
 	EtapaFrigorificoFoto = "FRIGORIFICO"
+
+	DenticaoZero   = 0
+	DenticaoDois   = 2
+	DenticaoQuatro = 4
+	DenticaoSeis   = 6
+	DenticaoOito   = 8
+
+	AcabamentoCarcacaAusente   = "AUSENTE"
+	AcabamentoCarcacaEscasso   = "ESCASSO"
+	AcabamentoCarcacaMediano   = "MEDIANO"
+	AcabamentoCarcacaUniforme  = "UNIFORME"
+	AcabamentoCarcacaExcessivo = "EXCESSIVO"
+	AcabamentoCarcacaMedianoUP = "MEDIANO UP"
+
+	ClassificacaoFrigorificoBoiFraco       = "BOI FRACO"
+	ClassificacaoFrigorificoBoiLeve        = "BOI LEVE"
+	ClassificacaoFrigorificoBoiMedioNormal = "BOI MÉDIO / NORMAL"
+	ClassificacaoFrigorificoBoiPesado      = "BOI PESADO"
+
+	FaixaDistribuicaoPeso18A19Ponto9 = "18 a 19.9"
+	FaixaDistribuicaoPeso20A21Ponto9 = "20 a 21.9"
+	FaixaDistribuicaoPeso22A23Ponto9 = "22 a 23.9"
+	FaixaDistribuicaoPesoAcimaDe24   = "acima de 24"
 )
+
+func DenticoesAbate() []int {
+	return []int{DenticaoZero, DenticaoDois, DenticaoQuatro, DenticaoSeis, DenticaoOito}
+}
+
+func AcabamentosCarcacaAbate() []string {
+	return []string{
+		AcabamentoCarcacaAusente,
+		AcabamentoCarcacaEscasso,
+		AcabamentoCarcacaMediano,
+		AcabamentoCarcacaUniforme,
+		AcabamentoCarcacaExcessivo,
+		AcabamentoCarcacaMedianoUP,
+	}
+}
+
+func ClassificacoesFrigorificoAbate() []string {
+	return []string{
+		ClassificacaoFrigorificoBoiFraco,
+		ClassificacaoFrigorificoBoiLeve,
+		ClassificacaoFrigorificoBoiMedioNormal,
+		ClassificacaoFrigorificoBoiPesado,
+	}
+}
+
+func FaixasDistribuicaoPesoAbate() []string {
+	return []string{
+		FaixaDistribuicaoPeso18A19Ponto9,
+		FaixaDistribuicaoPeso20A21Ponto9,
+		FaixaDistribuicaoPeso22A23Ponto9,
+		FaixaDistribuicaoPesoAcimaDe24,
+	}
+}
 
 type QtdDenticao struct {
 	QtdDenticao int
@@ -48,6 +104,7 @@ type DadosGeraisAbate struct {
 	CategoriaAnimal      string
 	PrecoFunrural        float64
 	PrecoSemFunrural     float64
+	Observacao           *string
 }
 
 type EtapaFazenda struct {

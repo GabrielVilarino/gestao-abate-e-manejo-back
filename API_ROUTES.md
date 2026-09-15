@@ -67,6 +67,7 @@ Todos aceitam admin e usuário autenticado, exceto os `DELETE`, que são exclusi
 | `POST` | `/api/v1/abate` | Cria um abate. Corpo completo abaixo; retorna `201 { "id", "message" }`. |
 | `GET` | `/api/v1/abate/:id` | Retorna o abate completo. |
 | `GET` | `/api/v1/abates` | Filtros opcionais: `proprietario_id`, `fazenda_id`, `numero_lote`, `data_inicio`, `data_fim`, `pagina` (padrão 1) e `limite` (padrão 50, máximo 100). Retorna `{ "abates": [], "pagina", "limite" }`. |
+| `POST` | `/api/v1/abates/relatorio` | Recebe `{ "abate_ids": [1, 2] }` e retorna um PDF (`application/pdf`) com resumo e registro fotográfico de cada abate. |
 | `PUT` | `/api/v1/abate/:id/dados-gerais` | Corpo `dados_gerais` do exemplo abaixo. |
 | `PUT` | `/api/v1/abate/:id/etapa-fazenda` | Corpo `etapa_fazenda` do exemplo abaixo. |
 | `PUT` | `/api/v1/abate/:id/etapa-frigorifico` | Corpo `etapa_frigorifico` do exemplo abaixo. |
@@ -87,23 +88,36 @@ Exemplo para criar o abate (campos numéricos não podem ser negativos; IDs e lo
     "distancia_frigorifico": 25.5,
     "categoria_animal": "Bovino",
     "preco_funrural": 10.5,
-    "preco_sem_funrural": 11.0
+    "preco_sem_funrural": 11.0,
+    "observacao": "Lote sem ocorrências"
   },
   "etapa_fazenda": {
     "peso_total": 1000,
-    "quantidade_animal": [{ "denticao": 2, "qtd_animais": 10 }]
+    "quantidade_animal": [
+      { "denticao": 0, "qtd_animais": 0 },
+      { "denticao": 2, "qtd_animais": 10 }
+    ]
   },
   "etapa_frigorifico": {
     "peso_total": 900,
     "balancao": 890,
-    "acabamento_carcaca": [{ "acabamento": "3", "qtd_animais": 10 }],
-    "classificacao_frigorifico": [{ "classificacao": "A", "qtd_animais": 10 }],
-    "distribuicao_peso": [{ "classificacao": "A", "qtd_animais": 10, "peso_total": 900 }]
+    "acabamento_carcaca": [{ "acabamento": "MEDIANO", "qtd_animais": 10 }],
+    "classificacao_frigorifico": [{ "classificacao": "BOI MÉDIO / NORMAL", "qtd_animais": 10 }],
+    "distribuicao_peso": [{ "classificacao": "20 a 21.9", "qtd_animais": 10, "peso_total": 900 }]
   }
 }
 ```
 
-O retorno de um abate contém `id`, `proprietario_id`, `nome_proprietario`, `nome_fazenda`, `dados_gerais`, `etapa_fazenda` e `etapa_frigorifico`. Ambas as etapas incluem `fotos`; cada foto tem `id`, `etapa`, `nome_original`, `content_type`, `tamanho` e `sha256`.
+Na criação e nas atualizações das etapas, os valores de classificação são exatos e aceitam somente os seguintes catálogos:
+
+- `denticao`: `0`, `2`, `4`, `6` ou `8`;
+- `acabamento`: `AUSENTE`, `ESCASSO`, `MEDIANO`, `UNIFORME`, `EXCESSIVO` ou `MEDIANO UP`;
+- `classificacao_frigorifico.classificacao`: `BOI FRACO`, `BOI LEVE`, `BOI MÉDIO / NORMAL` ou `BOI PESADO`;
+- `distribuicao_peso.classificacao`: `18 a 19.9`, `20 a 21.9`, `22 a 23.9` ou `acima de 24`.
+
+O retorno de um abate contém `id`, `proprietario_id`, `nome_proprietario`, `nome_fazenda`, `dados_gerais`, `etapa_fazenda` e `etapa_frigorifico`. `dados_gerais.observacao` pode ser `null`. Ambas as etapas incluem `fotos`; cada foto tem `id`, `etapa`, `nome_original`, `content_type`, `tamanho` e `sha256`.
+
+O relatório exige Chrome ou Chromium instalado no ambiente da API. Cada abate inicia com a página de resumo e, após a observação, o registro fotográfico começa em nova página. Abates seguintes também começam em nova página. Todas as categorias dos catálogos aparecem no relatório na ordem acima; categorias sem registro são exibidas com quantidade, peso, médias e percentuais iguais a zero, inclusive com a barra zerada nos gráficos.
 
 ## Agenda
 

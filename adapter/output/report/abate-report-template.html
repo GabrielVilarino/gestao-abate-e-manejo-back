@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Relatório de Abate</title>
+  <style>
+    :root { --orange:#f5822a; --red:#ef2e35; --ink:#242424; --muted:#6c7178; --line:#d9dde2; --soft:#f7f8fa; --pale:#fff1e7; --green:#6e9e54; }
+    * { box-sizing:border-box; }
+    @page { size:A4 landscape; margin:0; }
+    html, body { margin:0; padding:0; background:#fff; color:var(--ink); font-family:Arial, Helvetica, sans-serif; }
+    .page { position:relative; width:297mm; height:210mm; overflow:hidden; break-after:page; page-break-after:always; background:#fff; padding:25px 28px 16px; }
+    .page:last-child { break-after:auto; page-break-after:auto; }
+    .accent { position:absolute; inset:0 0 auto; height:8px; background:linear-gradient(90deg,var(--red) 0 39%,var(--orange) 39%); }
+    .watermark { position:absolute; z-index:0; width:555px; left:50%; top:53%; transform:translate(-50%,-50%); opacity:.055; pointer-events:none; }
+    .content { position:relative; z-index:1; }
+    .header { height:60px; display:flex; align-items:flex-start; border-bottom:1px solid var(--line); }
+    .header h1 { margin:4px 0 4px; font-size:26px; letter-spacing:.2px; }
+    .header p { margin:0; color:var(--muted); font-size:12px; }
+    .brand { margin-left:auto; width:156px; height:58px; object-fit:contain; }
+    .identity { height:58px; margin-top:7px; padding:8px 14px; display:grid; grid-template-columns:2.7fr 1fr 1.1fr 1.3fr .65fr; gap:18px; align-items:center; background:var(--soft); border:1px solid var(--line); border-radius:11px; }
+    .label { margin-bottom:7px; color:var(--muted); font-size:8px; font-weight:700; letter-spacing:.35px; text-transform:uppercase; }
+    .identity strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:16px; }
+    .identity .owner strong { font-size:18px; }
+    .metrics { display:grid; grid-template-columns:repeat(8,1fr); gap:7px; height:52px; margin-top:8px; }
+    .metric { position:relative; min-width:0; padding:8px 7px 6px 13px; border:1px solid var(--line); border-radius:9px; background:#fff; overflow:hidden; }
+    .metric::before { content:""; position:absolute; inset:0 auto 0 0; width:6px; background:var(--accent,var(--orange)); }
+    .metric .label { margin-bottom:7px; overflow:hidden; text-overflow:ellipsis; font-size:6.6px; white-space:nowrap; }
+    .metric strong { display:block; white-space:nowrap; font-size:14px; }
+    .metric.price strong { font-size:12px; }
+    .grid { display:grid; grid-template-columns:1.05fr 1fr; grid-template-rows:136px 136px; gap:8px 10px; margin-top:8px; }
+    .section { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.96); }
+    .section h2 { height:29px; margin:0; padding:8px 14px 0; background:var(--pale); font-size:14px; text-transform:uppercase; }
+    .bar-chart { height:106px; padding:10px 18px 5px; display:flex; align-items:flex-end; gap:12px; }
+    .bar-item { flex:1; min-width:0; text-align:center; }
+    .plot { position:relative; height:53px; border-bottom:1px solid #c8cdd3; display:flex; align-items:flex-end; justify-content:center; }
+    .track { position:relative; width:30px; height:49px; border-radius:4px 4px 0 0; background:#eef0f2; overflow:visible; }
+    .fill { position:absolute; inset:auto 0 0; height:var(--height); min-height:0; border-radius:4px 4px 0 0; background:var(--color); }
+    .percent { position:absolute; left:50%; bottom:calc(var(--height) + 4px); transform:translateX(-50%); font-size:10px; font-weight:700; white-space:nowrap; }
+    .bar-item h3 { margin:4px 0 1px; overflow:hidden; text-overflow:ellipsis; font-size:8px; white-space:nowrap; }
+    .bar-item small { display:block; color:var(--muted); font-size:7px; white-space:nowrap; }
+    .bar-item b { display:block; margin-top:3px; font-size:8px; }
+    .gastric { padding:7px 13px; }
+    .gastric-row { min-height:18px; display:flex; justify-content:space-between; align-items:center; padding:0 8px; color:var(--muted); font-size:9px; }
+    .gastric-row strong { color:var(--ink); font-size:10px; }
+    .gastric-row.highlight { margin:2px 0; border-radius:7px; background:var(--pale); color:var(--ink); font-weight:700; }
+    .gastric-row.highlight strong { color:var(--red); }
+    .gastric-row.green { background:#edf5e9; }
+    .gastric-row.green strong { color:var(--green); }
+    .finishing .bar-chart { gap:10px; padding-top:8px; }
+    .finishing .plot { height:56px; }
+    .finishing .track { width:27px; height:52px; }
+    .finishing .bar-item h3 { font-size:7.5px; }
+    .finishing .bar-item small { margin-top:4px; }
+    .classification-wrap { padding:5px 13px 6px; }
+    .classification-wrap th { padding:3px 5px; }
+    .classification-wrap td { padding:2px 5px; }
+    table { width:100%; border-collapse:collapse; font-size:8.5px; }
+    th { padding:4px 5px; background:var(--soft); color:var(--muted); text-align:left; font-size:6.4px; text-transform:uppercase; }
+    td { padding:3.6px 5px; border-bottom:1px solid var(--line); }
+    td:first-child { font-weight:700; }
+    tr.total td { background:var(--pale); font-weight:700; }
+    .source-note { margin-top:2px; color:var(--muted); font-size:6px; }
+    .weight-card { min-height:104px; margin-top:8px; overflow:visible; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.96); }
+    .weight-card h2 { height:23px; margin:0; padding:6px 14px 0; background:var(--pale); text-align:center; font-size:11px; text-transform:uppercase; }
+    .weight-card table { font-size:7.2px; }
+    .weight-card th { padding:3px 7px; }
+    .weight-card td { padding:2.3px 7px; border:0; }
+    .weight-card th:not(:first-child), .weight-card td:not(:first-child) { text-align:right; }
+    .weight-card tr.total td { border-top:1px solid var(--ink); }
+    .observations { height:52px; margin-top:8px; padding:8px 14px; border:1px solid var(--line); border-left:6px solid var(--orange); border-radius:0 10px 10px 0; background:var(--soft); overflow:hidden; }
+    .observations h2 { margin:0 0 5px; color:var(--muted); font-size:7px; text-transform:uppercase; }
+    .observations p { margin:0; font-size:8.5px; line-height:1.3; }
+    footer { display:flex; justify-content:space-between; margin-top:7px; color:var(--muted); font-size:6.5px; }
+    .photos-page .header { margin-bottom:10px; }
+    .photos-section { margin-top:10px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:rgba(255,255,255,.96); }
+    .photos-section h2 { height:30px; margin:0; padding:8px 14px 0; background:var(--pale); font-size:14px; text-transform:uppercase; }
+    .photo-grid { height:267px; padding:10px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:stretch; }
+    .photos-section:only-of-type .photo-grid { height:565px; grid-template-rows:repeat(2,1fr); }
+    .photo-card { min-width:0; min-height:0; margin:0; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:8px; background:var(--soft); }
+    .photo-card img { width:100%; min-height:0; flex:1; object-fit:contain; background:#fff; }
+    .photo-card figcaption { height:21px; padding:5px 7px; overflow:hidden; color:var(--muted); font-size:8px; text-overflow:ellipsis; white-space:nowrap; }
+    .empty-photos { height:267px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+{{range $report := .Reports}}
+  <main class="page summary-page">
+    <div class="accent"></div>
+    <div class="content">
+      <header class="header">
+        <div><h1>RELATÓRIO DE ABATE</h1><p>Resumo técnico com distribuição por dentição</p></div>
+        <img class="brand" alt="Tecnutre" src="{{safeURL $.BrandDataURL}}">
+      </header>
+      <section class="identity">
+        <div class="owner"><div class="label">Proprietário / Fazenda</div><strong>{{upper $report.Abate.NomeProprietario}} / {{upper $report.Abate.NomeFazenda}}</strong></div>
+        <div><div class="label">Data do abate</div><strong>{{formatDate $report.Abate.DadosGeraisAbate.DataAbate}}</strong></div>
+        <div><div class="label">Frigorífico</div><strong>{{upper $report.Abate.DadosGeraisAbate.NomeFrigorifico}}</strong></div>
+        <div><div class="label">Categoria</div><strong>{{upper $report.Abate.DadosGeraisAbate.CategoriaAnimal}}</strong></div>
+        <div><div class="label">Animais</div><strong>{{$report.QuantidadeAnimais}}</strong></div>
+      </section>
+      <section class="metrics">
+        <div class="metric" style="--accent:var(--red)"><div class="label">Peso frigorífico</div><strong>{{formatNumber $report.Abate.EtapaFrigorifico.PesoTotal 2}} kg</strong></div>
+        <div class="metric"><div class="label">Peso médio frig.</div><strong>{{formatNumber $report.MediaKGFrigorifico 2}} kg</strong></div>
+        <div class="metric"><div class="label">Média @ frig.</div><strong>{{formatNumber $report.MediaArrobaFrigorifico 2}} @</strong></div>
+        <div class="metric"><div class="label">Peso fazenda</div><strong>{{formatNumber $report.Abate.EtapaFazenda.PesoTotal 2}} kg</strong></div>
+        <div class="metric"><div class="label">Peso médio faz.</div><strong>{{formatNumber $report.MediaKGFazenda 2}} kg</strong></div>
+        <div class="metric" style="--accent:var(--green)"><div class="label">Rendimento carcaça</div><strong>{{formatRatio $report.RendimentoCarcaca}}</strong></div>
+        <div class="metric price" style="--accent:var(--red)"><div class="label">Preço c/ Funrural</div><strong>R$ {{formatNumber $report.Abate.DadosGeraisAbate.PrecoFunrural 2}} / @</strong></div>
+        <div class="metric price"><div class="label">Preço sem Funrural</div><strong>R$ {{formatNumber $report.Abate.DadosGeraisAbate.PrecoSemFunrural 2}} / @</strong></div>
+      </section>
+      <div class="grid">
+        <section class="section"><h2>Distribuição por dentição</h2><div class="bar-chart">
+          {{range $index, $item := $report.Denticoes}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{barColor $index}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{$item.Denticao}} dentes</h3><small>{{if eq $item.Denticao 0}}até 18 meses{{else if eq $item.Denticao 2}}18 a 24 meses{{else if eq $item.Denticao 4}}24 a 36 meses{{else if eq $item.Denticao 6}}36 a 48 meses{{else if eq $item.Denticao 8}}acima de 48 meses{{end}}</small><b>{{$item.Quantidade}} animais</b></div>{{end}}
+        </div></section>
+        <section class="section"><h2>Esvaziamento gástrico</h2><div class="gastric">
+          <div class="gastric-row"><span>Peso médio balança (fazenda)</span><strong>{{formatNumber $report.MediaKGFazenda 2}} kg</strong></div>
+          <div class="gastric-row"><span>Peso médio balancão (frigorífico)</span><strong>{{formatNumber $report.PesoMedioBalancao 2}} kg</strong></div>
+          <div class="gastric-row highlight"><span>Esvaziamento</span><strong>{{formatNumber $report.Esvaziamento 2}} kg</strong></div>
+          <div class="gastric-row highlight green"><span>Rendimento balancão (frigorífico)</span><strong>{{formatRatio $report.RendimentoBalancao}}</strong></div>
+          <div class="gastric-row"><span>Balancão frigorífico</span><strong>{{formatNumber $report.Abate.EtapaFrigorifico.Balancao 2}} kg</strong></div>
+        </div></section>
+        <section class="section finishing"><h2>Acabamento de carcaça</h2><div class="bar-chart">
+          {{range $index, $item := $report.Acabamentos}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{barColor $index}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{upper $item.Classificacao}}</h3><small>{{$item.Quantidade}} animais</small></div>{{end}}
+        </div></section>
+        <section class="section"><h2>Classificação do frigorífico</h2><div class="classification-wrap">
+          <table><thead><tr><th>Classificação</th><th>Faixa de peso</th><th>Qtd.</th><th>%</th><th>Penalização</th></tr></thead><tbody>
+          {{range $item := $report.Classificacoes}}<tr><td>{{$item.Classificacao}}</td><td>{{classRange $item.Classificacao}}</td><td>{{$item.Quantidade}}</td><td>{{formatPercent $item.Percentual}}</td><td>{{classPenalty $item.Classificacao}}</td></tr>{{end}}
+          <tr class="total"><td>Total de bovinos</td><td></td><td>{{$report.QuantidadeAnimais}}</td><td>{{if $report.QuantidadeAnimais}}100,0%{{else}}0,0%{{end}}</td><td></td></tr>
+          </tbody></table><div class="source-note">Valores reproduzidos conforme os dados registrados no abate.</div>
+        </div></section>
+      </div>
+      <section class="weight-card"><h2>Distribuição do peso e quantidade de cabeças</h2><table>
+        <thead><tr><th>Classificação</th><th>Peso KG</th><th>Média KG</th><th>@ por cab.</th><th>Percentual</th></tr></thead><tbody>
+        {{range $item := $report.DistribuicoesPeso}}<tr><td>{{$item.Quantidade}} {{if eq $item.Classificacao "acima de 24"}}{{$item.Classificacao}}{{else}}de {{$item.Classificacao}}{{end}} arrobas</td><td>{{formatNumber $item.PesoTotal 2}}</td><td>{{formatNumber $item.MediaKG 2}}</td><td>{{formatNumber $item.MediaArroba 2}}</td><td>{{formatPercent $item.Percentual}}</td></tr>{{end}}
+        <tr class="total"><td>{{$report.QuantidadeAnimais}} animais</td><td>{{formatNumber $report.Abate.EtapaFrigorifico.PesoTotal 2}}</td><td>{{formatNumber $report.MediaKGFrigorifico 2}}</td><td>{{formatNumber $report.MediaArrobaFrigorifico 2}}</td><td>{{if hasValue $report.Abate.EtapaFrigorifico.PesoTotal}}100,0%{{else}}0,0%{{end}}</td></tr>
+        </tbody></table></section>
+      <section class="observations"><h2>Observações do abate</h2><p>{{$report.Observacao}}</p></section>
+      <footer><span>Relatório gerado a partir dos dados registrados no abate.</span><span>TECNUTRE | Assessoria em abates, contenção e pesagem em bovinos</span></footer>
+    </div>
+    <img class="watermark" alt="" aria-hidden="true" src="{{safeURL $.BrandDataURL}}">
+  </main>
+  {{range $photoPage := photoPages $report}}
+  <main class="page photos-page">
+    <div class="accent"></div><div class="content">
+      <header class="header"><div><h1>REGISTRO FOTOGRÁFICO</h1><p>{{upper $report.Abate.NomeProprietario}} / {{upper $report.Abate.NomeFazenda}} — Lote {{$report.Abate.DadosGeraisAbate.NumeroLote}}</p></div><img class="brand" alt="Tecnutre" src="{{safeURL $.BrandDataURL}}"></header>
+      {{if or (not $photoPage.FazendaContinuation) (gt (len $photoPage.Fazenda) 0)}}
+      <section class="photos-section"><h2>Fotos tiradas na etapa da fazenda{{if $photoPage.FazendaContinuation}} (continuação){{end}}</h2>
+        {{if $photoPage.Fazenda}}<div class="photo-grid">{{range $photo := $photoPage.Fazenda}}<figure class="photo-card"><img alt="{{$photo.NomeOriginal}}" src="{{safeURL $photo.DataURL}}"><figcaption>{{$photo.NomeOriginal}}</figcaption></figure>{{end}}</div>{{else}}<div class="empty-photos">Nenhuma foto registrada nesta etapa.</div>{{end}}
+      </section>{{end}}
+      {{if or (not $photoPage.FrigoContinuation) (gt (len $photoPage.Frigorifico) 0)}}
+      <section class="photos-section"><h2>Fotos tiradas na etapa do frigorífico{{if $photoPage.FrigoContinuation}} (continuação){{end}}</h2>
+        {{if $photoPage.Frigorifico}}<div class="photo-grid">{{range $photo := $photoPage.Frigorifico}}<figure class="photo-card"><img alt="{{$photo.NomeOriginal}}" src="{{safeURL $photo.DataURL}}"><figcaption>{{$photo.NomeOriginal}}</figcaption></figure>{{end}}</div>{{else}}<div class="empty-photos">Nenhuma foto registrada nesta etapa.</div>{{end}}
+      </section>{{end}}
+    </div><img class="watermark" alt="" aria-hidden="true" src="{{safeURL $.BrandDataURL}}">
+  </main>
+  {{end}}
+{{end}}
+</body>
+</html>

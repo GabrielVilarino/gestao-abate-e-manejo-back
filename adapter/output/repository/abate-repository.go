@@ -34,13 +34,13 @@ func (a AbateRepository) CreateAbate(abate *domain.Abate) error {
 			fazenda_id, numero_lote, data_abate, nome_frigorifico,
 			distancia_frigorifico, categoria_animal, preco_funrural,
 			preco_sem_funrural, peso_total_fazenda,
-			peso_total_frigorifico, balancao
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			peso_total_frigorifico, balancao, observacao
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		RETURNING id`,
 		d.FazendaID, d.NumeroLote, d.DataAbate, d.NomeFrigorifico,
 		d.DistanciaFrigorifico, d.CategoriaAnimal, d.PrecoFunrural,
 		d.PrecoSemFunrural, abate.EtapaFazenda.PesoTotal,
-		abate.EtapaFrigorifico.PesoTotal, abate.EtapaFrigorifico.Balancao,
+		abate.EtapaFrigorifico.PesoTotal, abate.EtapaFrigorifico.Balancao, d.Observacao,
 	).Scan(&abate.ID)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (a AbateRepository) FindAbateByID(id int) (*domain.Abate, error) {
 		return nil, err
 	}
 	abates := []domain.Abate{*abate}
-	if err := loadAbatesDetails(a.db, abates); err != nil {
+	if err := loadAbatesDetails(context.Background(), a.db, abates); err != nil {
 		return nil, err
 	}
 	return &abates[0], nil
@@ -126,7 +126,36 @@ func (a AbateRepository) FindAbates(filtro domain.FiltroAbate) ([]domain.Abate, 
 	if err := rows.Close(); err != nil {
 		return nil, err
 	}
-	if err := loadAbatesDetails(a.db, abates); err != nil {
+	if err := loadAbatesDetails(context.Background(), a.db, abates); err != nil {
+		return nil, err
+	}
+	return abates, nil
+}
+
+func (a AbateRepository) FindAbatesByIDs(ctx context.Context, ids []int) ([]domain.Abate, error) {
+	if len(ids) == 0 {
+		return []domain.Abate{}, nil
+	}
+	rows, err := a.db.QueryContext(ctx, baseAbateQuery+` WHERE a.id=ANY($1)`, pq.Array(ids))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	abates := make([]domain.Abate, 0, len(ids))
+	for rows.Next() {
+		abate, err := scanAbate(rows)
+		if err != nil {
+			return nil, err
+		}
+		abates = append(abates, *abate)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := loadAbatesDetails(ctx, a.db, abates); err != nil {
 		return nil, err
 	}
 	return abates, nil
@@ -135,20 +164,20 @@ func (a AbateRepository) FindAbates(filtro domain.FiltroAbate) ([]domain.Abate, 
 func (a AbateRepository) UpdateDadosGeraisAbate(abateID int, dados domain.DadosGeraisAbate) error {
 	query := `
 		WITH lock_identidade AS MATERIALIZED (
-			SELECT pg_advisory_xact_lock(hashtextextended($10,0))
+			SELECT pg_advisory_xact_lock(hashtextextended($11,0))
 		), estado AS MATERIALIZED (
 			SELECT a.id,
 				(a.fazenda_id<>$1 OR a.numero_lote<>$2) AS caminho_alterado,
 				EXISTS (SELECT 1 FROM public.abate_fotos af WHERE af.abate_id=a.id) AS possui_fotos
 			FROM public.abate a
 			CROSS JOIN lock_identidade
-			WHERE a.id=$9
+			WHERE a.id=$10
 			FOR UPDATE OF a
 		), atualizado AS (
 			UPDATE public.abate SET
 				fazenda_id=$1, numero_lote=$2, data_abate=$3, nome_frigorifico=$4,
 				distancia_frigorifico=$5, categoria_animal=$6,
-				preco_funrural=$7, preco_sem_funrural=$8
+				preco_funrural=$7, preco_sem_funrural=$8, observacao=$9
 			WHERE id IN (
 				SELECT id FROM estado WHERE NOT (caminho_alterado AND possui_fotos)
 			)
@@ -161,7 +190,7 @@ func (a AbateRepository) UpdateDadosGeraisAbate(abateID int, dados domain.DadosG
 	err := a.db.QueryRow(query,
 		dados.FazendaID, dados.NumeroLote, dados.DataAbate, dados.NomeFrigorifico,
 		dados.DistanciaFrigorifico, dados.CategoriaAnimal,
-		dados.PrecoFunrural, dados.PrecoSemFunrural, abateID,
+		dados.PrecoFunrural, dados.PrecoSemFunrural, dados.Observacao, abateID,
 		fmt.Sprintf("identity:abate:%d", abateID),
 	).Scan(&encontrado, &bloqueado, &atualizado)
 	if err != nil {
@@ -422,7 +451,7 @@ const baseAbateQuery = `
 		a.data_abate, a.nome_frigorifico, a.distancia_frigorifico,
 		a.categoria_animal, COALESCE(a.preco_funrural,0),
 		COALESCE(a.preco_sem_funrural,0), COALESCE(a.peso_total_fazenda,0),
-		COALESCE(a.peso_total_frigorifico,0), COALESCE(a.balancao,0)
+		COALESCE(a.peso_total_frigorifico,0), COALESCE(a.balancao,0), a.observacao
 	FROM public.abate a
 	JOIN public.fazenda f ON f.id=a.fazenda_id
 	JOIN public.proprietario p ON p.id=f.id_proprietario`
@@ -433,6 +462,7 @@ type scanner interface {
 
 func scanAbate(row scanner) (*domain.Abate, error) {
 	abate := &domain.Abate{}
+	var observacao sql.NullString
 	err := row.Scan(
 		&abate.ID, &abate.ProprietarioID, &abate.NomeProprietario, &abate.NomeFazenda,
 		&abate.DadosGeraisAbate.FazendaID, &abate.DadosGeraisAbate.NumeroLote,
@@ -441,7 +471,11 @@ func scanAbate(row scanner) (*domain.Abate, error) {
 		&abate.DadosGeraisAbate.PrecoFunrural, &abate.DadosGeraisAbate.PrecoSemFunrural,
 		&abate.EtapaFazenda.PesoTotal, &abate.EtapaFrigorifico.PesoTotal,
 		&abate.EtapaFrigorifico.Balancao,
+		&observacao,
 	)
+	if observacao.Valid {
+		abate.DadosGeraisAbate.Observacao = &observacao.String
+	}
 	return abate, err
 }
 
@@ -449,7 +483,11 @@ type queryer interface {
 	Query(query string, args ...any) (*sql.Rows, error)
 }
 
-func loadAbatesDetails(db queryer, abates []domain.Abate) error {
+type contextQueryer interface {
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+}
+
+func loadAbatesDetails(ctx context.Context, db contextQueryer, abates []domain.Abate) error {
 	if len(abates) == 0 {
 		return nil
 	}
@@ -460,7 +498,7 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		byID[abates[i].ID] = &abates[i]
 	}
 
-	rows, err := db.Query(`SELECT abate_id, denticao, qtd_animais FROM public.abate_denticao WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
+	rows, err := db.QueryContext(ctx, `SELECT abate_id, denticao, qtd_animais FROM public.abate_denticao WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
 	if err != nil {
 		return err
 	}
@@ -477,7 +515,7 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		return err
 	}
 
-	rows, err = db.Query(`SELECT abate_id, acabamento, qtd_animais FROM public.abate_acabamento_carcaca WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
+	rows, err = db.QueryContext(ctx, `SELECT abate_id, acabamento, qtd_animais FROM public.abate_acabamento_carcaca WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
 	if err != nil {
 		return err
 	}
@@ -494,7 +532,7 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		return err
 	}
 
-	rows, err = db.Query(`SELECT abate_id, classificacao, qtd_animais FROM public.abate_classificacao_frigorifico WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
+	rows, err = db.QueryContext(ctx, `SELECT abate_id, classificacao, qtd_animais FROM public.abate_classificacao_frigorifico WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
 	if err != nil {
 		return err
 	}
@@ -511,7 +549,7 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		return err
 	}
 
-	rows, err = db.Query(`SELECT abate_id, classificacao, qtd_animais, peso_total FROM public.abate_distribuicao_peso WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
+	rows, err = db.QueryContext(ctx, `SELECT abate_id, classificacao, qtd_animais, peso_total FROM public.abate_distribuicao_peso WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
 	if err != nil {
 		return err
 	}
@@ -528,7 +566,7 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		return err
 	}
 
-	fotos, err := queryFotos(db, `SELECT id, abate_id, etapa, object_key, COALESCE(nome_original,''), COALESCE(content_type,'application/octet-stream'), COALESCE(tamanho,0), COALESCE(sha256,'') FROM public.abate_fotos WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
+	fotos, err := queryFotosContext(ctx, db, `SELECT id, abate_id, etapa, object_key, COALESCE(nome_original,''), COALESCE(content_type,'application/octet-stream'), COALESCE(tamanho,0), COALESCE(sha256,'') FROM public.abate_fotos WHERE abate_id=ANY($1) ORDER BY abate_id,id`, pq.Array(ids))
 	if err != nil {
 		return err
 	}
@@ -540,6 +578,23 @@ func loadAbatesDetails(db queryer, abates []domain.Abate) error {
 		}
 	}
 	return nil
+}
+
+func queryFotosContext(ctx context.Context, db contextQueryer, query string, args ...any) ([]domain.FotoAbate, error) {
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	fotos := make([]domain.FotoAbate, 0)
+	for rows.Next() {
+		foto := domain.FotoAbate{}
+		if err := rows.Scan(&foto.ID, &foto.AbateID, &foto.Etapa, &foto.ObjectKey, &foto.NomeOriginal, &foto.ContentType, &foto.Tamanho, &foto.SHA256); err != nil {
+			return nil, err
+		}
+		fotos = append(fotos, foto)
+	}
+	return fotos, rows.Err()
 }
 
 func queryFotos(db queryer, query string, args ...any) ([]domain.FotoAbate, error) {

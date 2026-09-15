@@ -10,6 +10,7 @@ type AbatePort interface {
 	CreateAbate(abate *domain.Abate) error
 	FindAbateByID(id int) (*domain.Abate, error)
 	FindAbates(filtro domain.FiltroAbate) ([]domain.Abate, error)
+	FindAbatesByIDs(ctx context.Context, ids []int) ([]domain.Abate, error)
 	UpdateDadosGeraisAbate(abateID int, dados domain.DadosGeraisAbate) error
 	UpdateEtapaFazenda(abateID int, etapa domain.EtapaFazenda) error
 	UpdateEtapaFrigorifico(abateID int, etapa domain.EtapaFrigorifico) error
