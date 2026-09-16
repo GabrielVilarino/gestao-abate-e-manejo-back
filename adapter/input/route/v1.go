@@ -187,7 +187,6 @@ func initRoutesv1(
 		)
 		agenda.DELETE(
 			"/agenda/:id",
-			adminMiddleware,
 			agendaController.DeleteAgenda,
 		)
 		agenda.POST(
