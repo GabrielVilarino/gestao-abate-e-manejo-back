@@ -8,7 +8,7 @@ import (
 )
 
 func TestReportTemplateKeepsLayoutPageBreaksAndEscapesText(t *testing.T) {
-	generator, err := NewChromedpPDFGenerator([]byte(`<img class="brand" src="data:image/png;base64,bG9nbw==">`))
+	generator, err := NewChromedpPDFGenerator()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,6 +20,9 @@ func TestReportTemplateKeepsLayoutPageBreaksAndEscapesText(t *testing.T) {
 	html, err := generator.renderHTML([]output.AbateReport{report})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !strings.Contains(html, "data:image/png;base64,") {
+		t.Fatal("template did not embed the report logo")
 	}
 	for _, expected := range []string{
 		`class="page summary-page"`, `class="page photos-page"`, `class="watermark"`,
@@ -80,7 +83,7 @@ func TestReportTemplateKeepsBottomSpacingInSummaryCards(t *testing.T) {
 }
 
 func TestReportTemplateRendersBarsForZeroValues(t *testing.T) {
-	generator, err := NewChromedpPDFGenerator([]byte(`<img class="brand" src="data:image/png;base64,bG9nbw==">`))
+	generator, err := NewChromedpPDFGenerator()
 	if err != nil {
 		t.Fatal(err)
 	}

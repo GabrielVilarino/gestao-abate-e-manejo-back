@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	_ "embed"
 	"fmt"
 	"os"
 	"time"
@@ -22,9 +21,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
-
-//go:embed relatorio_html.html
-var abateReportReferenceHTML []byte
 
 func main() {
 	logger.Info("==> Iniciando Servidor <==")
@@ -107,7 +103,7 @@ func initAbateController(db *sql.DB, cleanupCtx context.Context) (*controller.Ab
 		return nil, err
 	}
 	abatePort := repository.NewAbateRepository(db)
-	reportGenerator, err := reportadapter.NewChromedpPDFGenerator(abateReportReferenceHTML)
+	reportGenerator, err := reportadapter.NewChromedpPDFGenerator()
 	if err != nil {
 		return nil, err
 	}

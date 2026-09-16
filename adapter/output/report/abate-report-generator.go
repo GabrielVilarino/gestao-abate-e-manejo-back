@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"html/template"
@@ -22,6 +23,9 @@ const reportGenerationTimeout = 2 * time.Minute
 //go:embed abate-report-template.html
 var reportTemplateHTML string
 
+//go:embed logo.png
+var brandLogoPNG []byte
+
 type ChromedpPDFGenerator struct {
 	template     *template.Template
 	brandDataURL string
@@ -39,11 +43,7 @@ type photoPage struct {
 	FrigoContinuation   bool
 }
 
-func NewChromedpPDFGenerator(referenceHTML []byte) (*ChromedpPDFGenerator, error) {
-	brandDataURL, err := extractBrandDataURL(string(referenceHTML))
-	if err != nil {
-		return nil, err
-	}
+func NewChromedpPDFGenerator() (*ChromedpPDFGenerator, error) {
 	functions := template.FuncMap{
 		"formatDate":    func(value time.Time) string { return value.Format("02/01/2006") },
 		"formatNumber":  formatNumber,
@@ -62,7 +62,10 @@ func NewChromedpPDFGenerator(referenceHTML []byte) (*ChromedpPDFGenerator, error
 	if err != nil {
 		return nil, fmt.Errorf("carregar template do relatório: %w", err)
 	}
-	return &ChromedpPDFGenerator{template: parsed, brandDataURL: brandDataURL}, nil
+	return &ChromedpPDFGenerator{
+		template:     parsed,
+		brandDataURL: "data:image/png;base64," + base64.StdEncoding.EncodeToString(brandLogoPNG),
+	}, nil
 }
 
 func (g *ChromedpPDFGenerator) Generate(ctx context.Context, reports []output.AbateReport) ([]byte, error) {
