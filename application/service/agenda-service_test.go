@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -126,6 +127,24 @@ func TestRunNotificationCycleSendsAndCompletes(t *testing.T) {
 	}
 	if sender.ttl <= 0 || sender.ttl > 60*60 {
 		t.Fatalf("TTL = %d", sender.ttl)
+	}
+}
+
+func TestRunNotificationCycleFormatsBodyInBrasiliaTime(t *testing.T) {
+	dataHora := time.Now().Add(time.Hour).Truncate(time.Second)
+	notifications := &agendaNotificationPortStub{
+		jobs:          []domain.AgendaNotification{{ID: 15, AgendaID: 23, UserID: 7, FazendaID: 4, FazendaNome: "Boa Vista", DataHora: dataHora.Add(time.Hour), LeaseToken: "lease-15"}},
+		subscriptions: []domain.PushSubscription{{Endpoint: "https://push.example/device"}},
+	}
+	sender := &pushSenderStub{fail: map[string]error{}}
+	service := NewAgendaNotificationService(agendaPortStub{}, notifications, sender)
+
+	if err := service.RunNotificationCycle(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	wantBody := fmt.Sprintf(`"body":"Você tem um agendamento de abate na fazenda Boa Vista às %s"`, dataHora.Add(time.Hour).In(brasiliaLocation).Format("15:04"))
+	if !bytes.Contains(sender.payload, []byte(wantBody)) {
+		t.Fatalf("body da notificação = %s", sender.payload)
 	}
 }
 

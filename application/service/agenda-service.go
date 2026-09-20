@@ -15,6 +15,14 @@ import (
 	"github.com/GabrielVilarino/gestao-abate-e-manejo-back/configuration/logger"
 )
 
+var brasiliaLocation = func() *time.Location {
+	location, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		return time.FixedZone("BRT", -3*60*60)
+	}
+	return location
+}()
+
 const (
 	agendaNotificationLease = 2 * time.Minute
 	agendaNotificationBatch = 50
@@ -192,7 +200,7 @@ func (a *AgendaService) sendAgendaNotification(ctx context.Context, job domain.A
 	}
 	payload, err := json.Marshal(map[string]any{
 		"title":      "Lembrete de agendamento",
-		"body":       fmt.Sprintf("Agendamento da fazenda %d em %s", job.FazendaID, job.DataHora.UTC().Format(time.RFC3339)),
+		"body":       fmt.Sprintf("Você tem um agendamento de abate em %s às %s", job.FazendaNome, job.DataHora.In(brasiliaLocation).Format("15:04")),
 		"agenda_id":  job.AgendaID,
 		"fazenda_id": job.FazendaID,
 		"data_hora":  job.DataHora.UTC().Format(time.RFC3339),

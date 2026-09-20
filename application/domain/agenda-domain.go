@@ -20,13 +20,14 @@ type AgendaFilter struct {
 }
 
 type AgendaNotification struct {
-	ID         int
-	AgendaID   int
-	UserID     int
-	FazendaID  int
-	DataHora   time.Time
-	Tentativas int
-	LeaseToken string
+	ID          int
+	AgendaID    int
+	UserID      int
+	FazendaID   int
+	FazendaNome string
+	DataHora    time.Time
+	Tentativas  int
+	LeaseToken  string
 }
 
 type PushSubscription struct {

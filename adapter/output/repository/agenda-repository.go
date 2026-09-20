@@ -216,8 +216,10 @@ func (a AgendaRepository) ClaimDueAgendaNotifications(lease time.Duration, limit
 			FROM due WHERE n.id = due.id
 			RETURNING n.id, n.agenda_id, n.user_id, n.tentativas, n.lease_token
 		)
-		SELECT c.id, c.agenda_id, c.user_id, c.tentativas, c.lease_token, a.fazenda_id, a.data_hora
-		FROM claimed c JOIN public.agenda a ON a.id = c.agenda_id`, lease.Seconds(), limit, leaseToken)
+		SELECT c.id, c.agenda_id, c.user_id, c.tentativas, c.lease_token, a.fazenda_id, f.nome, a.data_hora
+		FROM claimed c
+		JOIN public.agenda a ON a.id = c.agenda_id
+		JOIN public.fazenda f ON f.id = a.fazenda_id`, lease.Seconds(), limit, leaseToken)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +227,7 @@ func (a AgendaRepository) ClaimDueAgendaNotifications(lease time.Duration, limit
 	jobs := make([]domain.AgendaNotification, 0)
 	for rows.Next() {
 		var job domain.AgendaNotification
-		if err := rows.Scan(&job.ID, &job.AgendaID, &job.UserID, &job.Tentativas, &job.LeaseToken, &job.FazendaID, &job.DataHora); err != nil {
+		if err := rows.Scan(&job.ID, &job.AgendaID, &job.UserID, &job.Tentativas, &job.LeaseToken, &job.FazendaID, &job.FazendaNome, &job.DataHora); err != nil {
 			return nil, err
 		}
 		jobs = append(jobs, job)

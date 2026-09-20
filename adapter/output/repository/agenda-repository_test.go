@@ -65,8 +65,8 @@ func TestAgendaRepositoryClaimsDueJobsWithLeaseAndSkipLocked(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery(regexp.QuoteMeta("WITH due AS (")).
 		WithArgs(float64(120), 25, sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "agenda_id", "user_id", "tentativas", "lease_token", "fazenda_id", "data_hora"}).
-			AddRow(3, 11, 8, 2, "lease-1", 4, now.Add(time.Hour)))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "agenda_id", "user_id", "tentativas", "lease_token", "fazenda_id", "nome", "data_hora"}).
+			AddRow(3, 11, 8, 2, "lease-1", 4, "Boa Vista", now.Add(time.Hour)))
 	mock.ExpectCommit()
 	jobs, err := repository.ClaimDueAgendaNotifications(2*time.Minute, 25)
 	if err != nil {
@@ -74,6 +74,9 @@ func TestAgendaRepositoryClaimsDueJobsWithLeaseAndSkipLocked(t *testing.T) {
 	}
 	if len(jobs) != 1 || jobs[0].ID != 3 || jobs[0].Tentativas != 2 || jobs[0].UserID != 8 || jobs[0].LeaseToken != "lease-1" {
 		t.Fatalf("jobs = %+v", jobs)
+	}
+	if jobs[0].FazendaNome != "Boa Vista" {
+		t.Fatalf("nome da fazenda = %q", jobs[0].FazendaNome)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatal(err)

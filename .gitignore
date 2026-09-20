@@ -2,3 +2,4 @@
 ddl.sql
 .air.toml
 go.sum
+tmp/
