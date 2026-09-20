@@ -114,10 +114,10 @@
         </div></section>
         <section class="section"><h2>Esvaziamento gástrico</h2><div class="gastric">
           <div class="gastric-row"><span>Peso médio balança (fazenda)</span><strong>{{formatNumber $report.MediaKGFazenda 2}} kg</strong></div>
-          <div class="gastric-row"><span>Peso médio balancão (frigorífico)</span><strong>{{formatNumber $report.PesoMedioBalancao 2}} kg</strong></div>
+          <div class="gastric-row"><span>Peso médio balanção (frigorífico)</span><strong>{{formatNumber $report.PesoMedioBalancao 2}} kg</strong></div>
           <div class="gastric-row highlight"><span>Esvaziamento</span><strong>{{formatNumber $report.Esvaziamento 2}} kg</strong></div>
-          <div class="gastric-row highlight green"><span>Rendimento balancão (frigorífico)</span><strong>{{formatRatio $report.RendimentoBalancao}}</strong></div>
-          <div class="gastric-row"><span>Balancão frigorífico</span><strong>{{formatNumber $report.Abate.EtapaFrigorifico.Balancao 2}} kg</strong></div>
+          <div class="gastric-row highlight green"><span>Rendimento balanção (frigorífico)</span><strong>{{formatRatio $report.RendimentoBalancao}}</strong></div>
+          <div class="gastric-row"><span>Balanção frigorífico</span><strong>{{formatNumber $report.Abate.EtapaFrigorifico.Balancao 2}} kg</strong></div>
         </div></section>
         <section class="section finishing"><h2>Acabamento de carcaça</h2><div class="bar-chart">
           {{range $index, $item := $report.Acabamentos}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{barColor $index}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{upper $item.Classificacao}}</h3><small>{{$item.Quantidade}} animais</small></div>{{end}}

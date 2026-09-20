@@ -106,6 +106,7 @@ func (u *UserController) GetUsers(c *gin.Context) {
 	usersData := make([]response.UserDataResponse, len(*users))
 	for i, user := range *users {
 		usersData[i] = response.UserDataResponse{
+			ID:    user.ID,
 			Nome:  user.Nome,
 			Email: user.Email,
 			Role:  user.Role,
