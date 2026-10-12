@@ -33,22 +33,19 @@ func (a AbateRepository) CreateAbate(abate *domain.Abate) error {
 		INSERT INTO public.abate (
 			fazenda_id, numero_lote, data_abate, nome_frigorifico,
 			distancia_frigorifico, categoria_animal, preco_funrural,
-			preco_sem_funrural, peso_total_fazenda,
+			preco_sem_funrural, quantidade_total_cabecas, peso_total_fazenda,
 			peso_total_frigorifico, balancao, observacao
 		)
-		SELECT $1,$2,$3,$4,COALESCE(NULLIF($5, 0), f.distancia_frigorifico),$6,$7,$8,$9,$10,$11,$12
+		SELECT $1,$2,$3,$4,COALESCE(NULLIF($5, 0), f.distancia_frigorifico),$6,$7,$8,$9,$10,$11,$12,$13
 		FROM public.fazenda f
 		WHERE f.id = $1
 		RETURNING id`,
 		d.FazendaID, d.NumeroLote, d.DataAbate, d.NomeFrigorifico,
 		d.DistanciaFrigorifico, d.CategoriaAnimal, d.PrecoFunrural,
-		d.PrecoSemFunrural, abate.EtapaFazenda.PesoTotal,
+		d.PrecoSemFunrural, abate.EtapaFazenda.QuantidadeTotalCabecas, abate.EtapaFazenda.PesoTotal,
 		abate.EtapaFrigorifico.PesoTotal, abate.EtapaFrigorifico.Balancao, d.Observacao,
 	).Scan(&abate.ID)
 	if err != nil {
-		return err
-	}
-	if err := insertEtapaFazenda(tx, abate.ID, abate.EtapaFazenda); err != nil {
 		return err
 	}
 	if err := insertEtapaFrigorifico(tx, abate.ID, abate.EtapaFrigorifico); err != nil {
@@ -217,17 +214,11 @@ func (a AbateRepository) UpdateEtapaFazenda(abateID int, etapa domain.EtapaFazen
 		return err
 	}
 	defer tx.Rollback()
-	result, err := tx.Exec(`UPDATE public.abate SET peso_total_fazenda=$1 WHERE id=$2`, etapa.PesoTotal, abateID)
+	result, err := tx.Exec(`UPDATE public.abate SET quantidade_total_cabecas=$1, peso_total_fazenda=$2 WHERE id=$3`, etapa.QuantidadeTotalCabecas, etapa.PesoTotal, abateID)
 	if err != nil {
 		return err
 	}
 	if err := ensureAbateFound(result); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(`DELETE FROM public.abate_denticao WHERE abate_id=$1`, abateID); err != nil {
-		return err
-	}
-	if err := insertEtapaFazenda(tx, abateID, etapa); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -246,7 +237,7 @@ func (a AbateRepository) UpdateEtapaFrigorifico(abateID int, etapa domain.EtapaF
 	if err := ensureAbateFound(result); err != nil {
 		return err
 	}
-	for _, table := range []string{"abate_acabamento_carcaca", "abate_classificacao_frigorifico", "abate_distribuicao_peso"} {
+	for _, table := range []string{"abate_denticao", "abate_acabamento_carcaca", "abate_classificacao_frigorifico", "abate_distribuicao_peso"} {
 		if _, err := tx.Exec("DELETE FROM public."+table+" WHERE abate_id=$1", abateID); err != nil {
 			return err
 		}
@@ -453,7 +444,7 @@ const baseAbateQuery = `
 	SELECT a.id, p.id, p.nome, f.nome, a.fazenda_id, a.numero_lote,
 		a.data_abate, a.nome_frigorifico, a.distancia_frigorifico,
 		a.categoria_animal, COALESCE(a.preco_funrural,0),
-		COALESCE(a.preco_sem_funrural,0), COALESCE(a.peso_total_fazenda,0),
+		COALESCE(a.preco_sem_funrural,0), COALESCE(a.quantidade_total_cabecas,0), COALESCE(a.peso_total_fazenda,0),
 		COALESCE(a.peso_total_frigorifico,0), COALESCE(a.balancao,0), a.observacao
 	FROM public.abate a
 	JOIN public.fazenda f ON f.id=a.fazenda_id
@@ -472,7 +463,7 @@ func scanAbate(row scanner) (*domain.Abate, error) {
 		&abate.DadosGeraisAbate.DataAbate, &abate.DadosGeraisAbate.NomeFrigorifico,
 		&abate.DadosGeraisAbate.DistanciaFrigorifico, &abate.DadosGeraisAbate.CategoriaAnimal,
 		&abate.DadosGeraisAbate.PrecoFunrural, &abate.DadosGeraisAbate.PrecoSemFunrural,
-		&abate.EtapaFazenda.PesoTotal, &abate.EtapaFrigorifico.PesoTotal,
+		&abate.EtapaFazenda.QuantidadeTotalCabecas, &abate.EtapaFazenda.PesoTotal, &abate.EtapaFrigorifico.PesoTotal,
 		&abate.EtapaFrigorifico.Balancao,
 		&observacao,
 	)
@@ -512,7 +503,7 @@ func loadAbatesDetails(ctx context.Context, db contextQueryer, abates []domain.A
 			rows.Close()
 			return err
 		}
-		byID[abateID].EtapaFazenda.QuantidadeAnimal = append(byID[abateID].EtapaFazenda.QuantidadeAnimal, item)
+		byID[abateID].EtapaFrigorifico.QuantidadeAnimal = append(byID[abateID].EtapaFrigorifico.QuantidadeAnimal, item)
 	}
 	if err := closeRows(rows); err != nil {
 		return err
@@ -623,16 +614,12 @@ func closeRows(rows *sql.Rows) error {
 	return err
 }
 
-func insertEtapaFazenda(tx *sql.Tx, abateID int, etapa domain.EtapaFazenda) error {
+func insertEtapaFrigorifico(tx *sql.Tx, abateID int, etapa domain.EtapaFrigorifico) error {
 	for _, item := range etapa.QuantidadeAnimal {
 		if _, err := tx.Exec(`INSERT INTO public.abate_denticao (abate_id,denticao,qtd_animais) VALUES ($1,$2,$3)`, abateID, item.QtdDenticao, item.QtdAnimais); err != nil {
 			return err
 		}
 	}
-	return nil
-}
-
-func insertEtapaFrigorifico(tx *sql.Tx, abateID int, etapa domain.EtapaFrigorifico) error {
 	for _, item := range etapa.AcabamentoCarcaca {
 		if _, err := tx.Exec(`INSERT INTO public.abate_acabamento_carcaca (abate_id,acabamento,qtd_animais) VALUES ($1,$2,$3)`, abateID, item.Acabamento, item.QtdAnimais); err != nil {
 			return err

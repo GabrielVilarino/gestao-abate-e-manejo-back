@@ -46,12 +46,13 @@ func TestAbateStageRequestsValidateNestedCatalogItems(t *testing.T) {
 	validate.SetTagName("binding")
 	invalidDenticao := 3
 
-	fazenda := EtapaFazendaRequest{QuantidadeAnimal: []QtdDenticaoRequest{{QtdDenticao: &invalidDenticao}}}
-	if err := validate.Struct(fazenda); err == nil {
+	/* dentição pertence à etapa frigorífico */
+	if err := validate.Struct(EtapaFazendaRequest{}); err == nil {
 		t.Fatal("etapa fazenda aceitou dentição inválida")
 	}
 
 	frigorifico := EtapaFrigorificoRequest{
+		QuantidadeAnimal:         []QtdDenticaoRequest{{QtdDenticao: &invalidDenticao}},
 		AcabamentoCarcaca:        []AcabamentoCarcacaRequest{{Acabamento: "INVÁLIDO"}},
 		ClassificacaoFrigorifico: []ClassificacaoFrigorificoRequest{{Classificacao: "BOI FRACO"}},
 		DistribuicaoPeso:         []DistribuicaoPesoRequest{{Classificacao: "18 a 19.9"}},

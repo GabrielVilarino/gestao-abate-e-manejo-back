@@ -20,7 +20,8 @@ import (
 const (
 	dateLayout       = "2006-01-02"
 	maxFotoUpload    = 10 << 20
-	maxMultipartBody = maxFotoUpload + (2 << 20)
+	maxVideoUpload   = 50 << 20
+	maxMultipartBody = maxVideoUpload + (2 << 20)
 )
 
 type AbateController struct {
@@ -241,7 +242,7 @@ func (a *AbateController) UploadFotoAbate(c *gin.Context) {
 		return
 	}
 	defer file.Close()
-	data, err := io.ReadAll(io.LimitReader(file, maxFotoUpload+1))
+	data, err := io.ReadAll(io.LimitReader(file, maxVideoUpload+1))
 	if err != nil {
 		a.internalError(c, "UploadFotoAbate", err)
 		return
@@ -253,7 +254,8 @@ func (a *AbateController) UploadFotoAbate(c *gin.Context) {
 			c.JSON(http.StatusNotFound, response.AbateErrorResponse{Error: err.Error()})
 		case errors.Is(err, domain.ErrEtapaFotoInvalida),
 			errors.Is(err, domain.ErrFormatoFotoInvalido),
-			errors.Is(err, domain.ErrTamanhoFotoInvalido):
+			errors.Is(err, domain.ErrTamanhoFotoInvalido),
+			errors.Is(err, domain.ErrTamanhoVideoInvalido):
 			c.JSON(http.StatusBadRequest, response.AbateErrorResponse{Error: err.Error()})
 		default:
 			a.internalError(c, "UploadFotoAbate", err)
@@ -380,19 +382,19 @@ func requestToDadosGerais(value request.DadosGeraisAbateRequest) (domain.DadosGe
 }
 
 func requestToEtapaFazenda(value request.EtapaFazendaRequest) domain.EtapaFazenda {
-	etapa := domain.EtapaFazenda{PesoTotal: value.PesoTotal, QuantidadeAnimal: make([]domain.QtdDenticao, len(value.QuantidadeAnimal))}
-	for i, item := range value.QuantidadeAnimal {
-		etapa.QuantidadeAnimal[i] = domain.QtdDenticao{QtdDenticao: *item.QtdDenticao, QtdAnimais: item.QtdAnimais}
-	}
-	return etapa
+	return domain.EtapaFazenda{QuantidadeTotalCabecas: value.QuantidadeTotalCabecas, PesoTotal: value.PesoTotal}
 }
 
 func requestToEtapaFrigorifico(value request.EtapaFrigorificoRequest) domain.EtapaFrigorifico {
 	etapa := domain.EtapaFrigorifico{
-		PesoTotal: value.PesoTotal, Balancao: value.Balancao,
+		QuantidadeAnimal: make([]domain.QtdDenticao, len(value.QuantidadeAnimal)),
+		PesoTotal:        value.PesoTotal, Balancao: value.Balancao,
 		AcabamentoCarcaca:        make([]domain.AcabamentoCarcaca, len(value.AcabamentoCarcaca)),
 		ClassificacaoFrigorifico: make([]domain.ClassificacaoFrigorifico, len(value.ClassificacaoFrigorifico)),
 		DistribuicaoPeso:         make([]domain.DistribuicaoPeso, len(value.DistribuicaoPeso)),
+	}
+	for i, item := range value.QuantidadeAnimal {
+		etapa.QuantidadeAnimal[i] = domain.QtdDenticao{QtdDenticao: *item.QtdDenticao, QtdAnimais: item.QtdAnimais}
 	}
 	for i, item := range value.AcabamentoCarcaca {
 		etapa.AcabamentoCarcaca[i] = domain.AcabamentoCarcaca{Acabamento: item.Acabamento, QtdAnimais: item.QtdAnimais}
@@ -421,20 +423,21 @@ func abateResponse(value domain.Abate) response.AbateDataResponse {
 			Observacao:           value.DadosGeraisAbate.Observacao,
 		},
 		EtapaFazenda: response.EtapaFazendaResponse{
-			PesoTotal:        value.EtapaFazenda.PesoTotal,
-			QuantidadeAnimal: make([]response.QtdDenticaoResponse, len(value.EtapaFazenda.QuantidadeAnimal)),
-			Fotos:            make([]response.FotoAbateResponse, len(value.EtapaFazenda.Fotos)),
+			QuantidadeTotalCabecas: value.EtapaFazenda.QuantidadeTotalCabecas,
+			PesoTotal:              value.EtapaFazenda.PesoTotal,
+			Fotos:                  make([]response.FotoAbateResponse, len(value.EtapaFazenda.Fotos)),
 		},
 		EtapaFrigorifico: response.EtapaFrigorificoResponse{
-			PesoTotal: value.EtapaFrigorifico.PesoTotal, Balancao: value.EtapaFrigorifico.Balancao,
+			QuantidadeAnimal: make([]response.QtdDenticaoResponse, len(value.EtapaFrigorifico.QuantidadeAnimal)),
+			PesoTotal:        value.EtapaFrigorifico.PesoTotal, Balancao: value.EtapaFrigorifico.Balancao,
 			AcabamentoCarcaca:        make([]response.AcabamentoCarcacaResponse, len(value.EtapaFrigorifico.AcabamentoCarcaca)),
 			ClassificacaoFrigorifico: make([]response.ClassificacaoFrigorificoResponse, len(value.EtapaFrigorifico.ClassificacaoFrigorifico)),
 			DistribuicaoPeso:         make([]response.DistribuicaoPesoResponse, len(value.EtapaFrigorifico.DistribuicaoPeso)),
 			Fotos:                    make([]response.FotoAbateResponse, len(value.EtapaFrigorifico.Fotos)),
 		},
 	}
-	for i, item := range value.EtapaFazenda.QuantidadeAnimal {
-		result.EtapaFazenda.QuantidadeAnimal[i] = response.QtdDenticaoResponse{QtdDenticao: item.QtdDenticao, QtdAnimais: item.QtdAnimais}
+	for i, item := range value.EtapaFrigorifico.QuantidadeAnimal {
+		result.EtapaFrigorifico.QuantidadeAnimal[i] = response.QtdDenticaoResponse{QtdDenticao: item.QtdDenticao, QtdAnimais: item.QtdAnimais}
 	}
 	for i, foto := range value.EtapaFazenda.Fotos {
 		result.EtapaFazenda.Fotos[i] = fotoResponse(foto)

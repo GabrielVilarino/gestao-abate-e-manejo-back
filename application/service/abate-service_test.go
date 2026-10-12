@@ -176,6 +176,29 @@ func TestAbateServiceUploadUsesDurableIntentAndHashKey(t *testing.T) {
 	}
 }
 
+func TestAbateServiceReportIgnoresVideos(t *testing.T) {
+	service := NewAbateService(
+		abatePortStub{
+			findFotoID: func(id int) (*domain.FotoAbate, error) {
+				return &domain.FotoAbate{ID: id, ContentType: "image/jpeg", NomeOriginal: "foto.jpg"}, nil
+			},
+		},
+		storagePortStub{download: func(context.Context, string) (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader([]byte("imagem"))), nil
+		}},
+	)
+	fotos, err := service.reportPhotos(context.Background(), []domain.FotoAbate{
+		{ID: 1, ContentType: "image/jpeg"},
+		{ID: 2, ContentType: "video/mp4"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(fotos) != 1 || fotos[0].NomeOriginal != "foto.jpg" {
+		t.Fatalf("fotos do relatório=%+v", fotos)
+	}
+}
+
 func TestAbateServiceCompensatesCreateFotoFailure(t *testing.T) {
 	data := []byte{0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0}
 	createErr := errors.New("falha ao inserir")
@@ -420,14 +443,14 @@ func TestAbateServiceGeneratesReportWithCalculationsAndPhotos(t *testing.T) {
 		ID: 7, NomeProprietario: "Dono", NomeFazenda: "Fazenda",
 		DadosGeraisAbate: domain.DadosGeraisAbate{Observacao: &observation},
 		EtapaFazenda: domain.EtapaFazenda{
-			PesoTotal: 1200,
+			QuantidadeTotalCabecas: 3,
+			PesoTotal:              1200,
+		},
+		EtapaFrigorifico: domain.EtapaFrigorifico{
 			QuantidadeAnimal: []domain.QtdDenticao{
 				{QtdDenticao: domain.DenticaoZero, QtdAnimais: 1},
 				{QtdDenticao: domain.DenticaoDois, QtdAnimais: 2},
 			},
-			Fotos: []domain.FotoAbate{{ID: 10}},
-		},
-		EtapaFrigorifico: domain.EtapaFrigorifico{
 			PesoTotal: 600, Balancao: 900,
 			AcabamentoCarcaca: []domain.AcabamentoCarcaca{
 				{Acabamento: domain.AcabamentoCarcacaMediano, QtdAnimais: 2},
@@ -438,7 +461,7 @@ func TestAbateServiceGeneratesReportWithCalculationsAndPhotos(t *testing.T) {
 			DistribuicaoPeso: []domain.DistribuicaoPeso{
 				{Classificacao: domain.FaixaDistribuicaoPeso20A21Ponto9, QtdAnimais: 2, PesoTotal: 450},
 			},
-			Fotos: []domain.FotoAbate{{ID: 11}},
+			Fotos: []domain.FotoAbate{{ID: 11, ContentType: "image/jpeg"}},
 		},
 	}
 	port := abatePortStub{
@@ -487,11 +510,11 @@ func TestAbateServiceGeneratesReportWithCalculationsAndPhotos(t *testing.T) {
 		if report.DistribuicoesPeso[0].Quantidade != 0 || report.DistribuicoesPeso[0].PesoTotal != 0 || report.DistribuicoesPeso[0].MediaKG != 0 || report.DistribuicoesPeso[0].MediaArroba != 0 || report.DistribuicoesPeso[0].Percentual != 0 {
 			t.Fatalf("faixa ausente deveria estar zerada: %+v", report.DistribuicoesPeso[0])
 		}
-		if report.Observacao != "Animais sem ocorrências." || len(report.FotosFazenda) != 1 || len(report.FotosFrigorifico) != 1 {
+		if report.Observacao != "Animais sem ocorrências." || len(report.FotosFazenda) != 0 || len(report.FotosFrigorifico) != 1 {
 			t.Fatalf("dados=%+v", report)
 		}
-		if !strings.HasPrefix(report.FotosFazenda[0].DataURL, "data:image/jpeg;base64,") {
-			t.Fatalf("data url=%s", report.FotosFazenda[0].DataURL)
+		if !strings.HasPrefix(report.FotosFrigorifico[0].DataURL, "data:image/jpeg;base64,") {
+			t.Fatalf("data url=%s", report.FotosFrigorifico[0].DataURL)
 		}
 		return []byte("%PDF"), nil
 	}}
@@ -529,12 +552,13 @@ func TestAbateServiceReportAvoidsDivisionByZeroAndUsesObservationFallback(t *tes
 
 func TestAbateServiceReportUsesCanonicalOrderAndIgnoresValuesOutsideCatalog(t *testing.T) {
 	abate := domain.Abate{
-		ID: 1,
-		EtapaFazenda: domain.EtapaFazenda{QuantidadeAnimal: []domain.QtdDenticao{
-			{QtdDenticao: domain.DenticaoOito, QtdAnimais: 2},
-			{QtdDenticao: 3, QtdAnimais: 99},
-		}},
+		ID:           1,
+		EtapaFazenda: domain.EtapaFazenda{QuantidadeTotalCabecas: 2},
 		EtapaFrigorifico: domain.EtapaFrigorifico{
+			QuantidadeAnimal: []domain.QtdDenticao{
+				{QtdDenticao: domain.DenticaoOito, QtdAnimais: 2},
+				{QtdDenticao: 3, QtdAnimais: 99},
+			},
 			AcabamentoCarcaca: []domain.AcabamentoCarcaca{
 				{Acabamento: domain.AcabamentoCarcacaMedianoUP, QtdAnimais: 2},
 				{Acabamento: "FORA DO CATÁLOGO", QtdAnimais: 99},

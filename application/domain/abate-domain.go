@@ -108,12 +108,13 @@ type DadosGeraisAbate struct {
 }
 
 type EtapaFazenda struct {
-	QuantidadeAnimal []QtdDenticao
-	PesoTotal        float64
-	Fotos            []FotoAbate
+	QuantidadeTotalCabecas int
+	PesoTotal              float64
+	Fotos                  []FotoAbate
 }
 
 type EtapaFrigorifico struct {
+	QuantidadeAnimal         []QtdDenticao
 	PesoTotal                float64
 	Balancao                 float64
 	AcabamentoCarcaca        []AcabamentoCarcaca

@@ -34,11 +34,12 @@ type DistribuicaoPesoRequest struct {
 }
 
 type EtapaFazendaRequest struct {
-	QuantidadeAnimal []QtdDenticaoRequest `json:"quantidade_animal" binding:"dive"`
-	PesoTotal        float64              `json:"peso_total" binding:"gte=0"`
+	QuantidadeTotalCabecas int     `json:"quantidade_total_cabecas" binding:"required,gt=0"`
+	PesoTotal              float64 `json:"peso_total" binding:"gte=0"`
 }
 
 type EtapaFrigorificoRequest struct {
+	QuantidadeAnimal         []QtdDenticaoRequest              `json:"quantidade_animal" binding:"dive"`
 	PesoTotal                float64                           `json:"peso_total" binding:"gte=0"`
 	Balancao                 float64                           `json:"balancao" binding:"gte=0"`
 	AcabamentoCarcaca        []AcabamentoCarcacaRequest        `json:"acabamento_carcaca" binding:"dive"`

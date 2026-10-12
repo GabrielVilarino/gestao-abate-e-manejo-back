@@ -22,6 +22,7 @@ import (
 
 const (
 	maxFotoSize      = 10 << 20
+	maxVideoSize     = 50 << 20
 	storageTimeout   = 30 * time.Second
 	cleanupBatchSize = 20
 )
@@ -123,10 +124,10 @@ func (a *AbateService) buildAbateReport(ctx context.Context, abate domain.Abate)
 	for _, denticao := range domain.DenticoesAbate() {
 		denticoes[denticao] = 0
 	}
-	for _, item := range abate.EtapaFazenda.QuantidadeAnimal {
+	report.QuantidadeAnimais = abate.EtapaFazenda.QuantidadeTotalCabecas
+	for _, item := range abate.EtapaFrigorifico.QuantidadeAnimal {
 		if _, ok := denticoes[item.QtdDenticao]; ok {
 			denticoes[item.QtdDenticao] += item.QtdAnimais
-			report.QuantidadeAnimais += item.QtdAnimais
 		}
 	}
 	if report.QuantidadeAnimais > 0 {
@@ -241,6 +242,9 @@ func (a *AbateService) buildAbateReport(ctx context.Context, abate domain.Abate)
 func (a *AbateService) reportPhotos(ctx context.Context, photos []domain.FotoAbate) ([]output.AbateReportPhoto, error) {
 	result := make([]output.AbateReportPhoto, 0, len(photos))
 	for _, photo := range photos {
+		if photo.ContentType != "image/png" && photo.ContentType != "image/jpeg" {
+			continue
+		}
 		metadata, body, err := a.DownloadFotoAbate(ctx, photo.ID)
 		if err != nil {
 			return nil, err
@@ -318,11 +322,17 @@ func (a *AbateService) UploadFotoAbate(
 	if etapa != domain.EtapaFazendaFoto && etapa != domain.EtapaFrigorificoFoto {
 		return nil, domain.ErrEtapaFotoInvalida
 	}
-	if len(data) > maxFotoSize {
-		return nil, domain.ErrTamanhoFotoInvalido
-	}
 	contentType := http.DetectContentType(data)
-	if contentType != "image/png" && contentType != "image/jpeg" {
+	switch contentType {
+	case "image/png", "image/jpeg":
+		if len(data) > maxFotoSize {
+			return nil, domain.ErrTamanhoFotoInvalido
+		}
+	case "video/mp4", "video/webm":
+		if len(data) > maxVideoSize {
+			return nil, domain.ErrTamanhoVideoInvalido
+		}
+	default:
 		return nil, domain.ErrFormatoFotoInvalido
 	}
 

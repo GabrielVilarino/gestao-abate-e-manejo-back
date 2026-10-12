@@ -23,12 +23,15 @@ func TestAbateRepositoryCreatePersistsRequiredFieldsAndRollsBackOnChildError(t *
 			CategoriaAnimal: "Bovino", PrecoFunrural: 10, PrecoSemFunrural: 11,
 		},
 		EtapaFazenda: domain.EtapaFazenda{
-			PesoTotal: 100, QuantidadeAnimal: []domain.QtdDenticao{{QtdDenticao: 2, QtdAnimais: 5}},
+			QuantidadeTotalCabecas: 5, PesoTotal: 100,
+		},
+		EtapaFrigorifico: domain.EtapaFrigorifico{
+			QuantidadeAnimal: []domain.QtdDenticao{{QtdDenticao: 2, QtdAnimais: 5}},
 		},
 	}
 	mock.ExpectBegin()
 	mock.ExpectQuery(`INSERT INTO public\.abate`).
-		WithArgs(2, 41, date, "Frigo", 87.5, "Bovino", 10.0, 11.0, 100.0, 0.0, 0.0, nil).
+		WithArgs(2, 41, date, "Frigo", 87.5, "Bovino", 10.0, 11.0, 5, 100.0, 0.0, 0.0, nil).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(9))
 	childErr := errors.New("falha no detalhe")
 	mock.ExpectExec(`INSERT INTO public\.abate_denticao`).
@@ -60,7 +63,7 @@ func TestAbateRepositoryFindUsesAllOptionalFilters(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{
 			"id", "proprietario_id", "proprietario", "fazenda", "fazenda_id", "numero_lote",
 			"data_abate", "frigorifico", "distancia", "categoria", "funrural", "sem_funrural",
-			"peso_fazenda", "peso_frigorifico", "balancao", "observacao",
+			"quantidade_total_cabecas", "peso_fazenda", "peso_frigorifico", "balancao", "observacao",
 		}))
 
 	got, err := NewAbateRepository(db).FindAbates(domain.FiltroAbate{
@@ -167,10 +170,10 @@ func TestAbateRepositoryLoadsListDetailsInFiveBatchQueries(t *testing.T) {
 	baseRows := sqlmock.NewRows([]string{
 		"id", "proprietario_id", "proprietario", "fazenda", "fazenda_id", "numero_lote",
 		"data_abate", "frigorifico", "distancia", "categoria", "funrural", "sem_funrural",
-		"peso_fazenda", "peso_frigorifico", "balancao", "observacao",
+		"quantidade_total_cabecas", "peso_fazenda", "peso_frigorifico", "balancao", "observacao",
 	}).
-		AddRow(9, 1, "Dono", "Fazenda", 2, 10, time.Now(), "Frigo", 3.0, "Bovino", 1.0, 2.0, 3.0, 4.0, 5.0, nil).
-		AddRow(10, 1, "Dono", "Fazenda", 2, 11, time.Now(), "Frigo", 3.0, "Bovino", 1.0, 2.0, 3.0, 4.0, 5.0, "ok")
+		AddRow(9, 1, "Dono", "Fazenda", 2, 10, time.Now(), "Frigo", 3.0, "Bovino", 1.0, 2.0, 10, 3.0, 4.0, 5.0, nil).
+		AddRow(10, 1, "Dono", "Fazenda", 2, 11, time.Now(), "Frigo", 3.0, "Bovino", 1.0, 2.0, 11, 3.0, 4.0, 5.0, "ok")
 	mock.ExpectQuery(`(?s)FROM public\.abate a.*LIMIT \$1 OFFSET \$2`).
 		WithArgs(50, 0).WillReturnRows(baseRows)
 	mock.ExpectQuery(`SELECT abate_id, denticao.*ANY`).WithArgs(sqlmock.AnyArg()).

@@ -52,12 +52,13 @@ type DadosGeraisAbateResponse struct {
 }
 
 type EtapaFazendaResponse struct {
-	QuantidadeAnimal []QtdDenticaoResponse `json:"quantidade_animal"`
-	PesoTotal        float64               `json:"peso_total"`
-	Fotos            []FotoAbateResponse   `json:"fotos"`
+	QuantidadeTotalCabecas int                 `json:"quantidade_total_cabecas"`
+	PesoTotal              float64             `json:"peso_total"`
+	Fotos                  []FotoAbateResponse `json:"fotos"`
 }
 
 type EtapaFrigorificoResponse struct {
+	QuantidadeAnimal         []QtdDenticaoResponse              `json:"quantidade_animal"`
 	PesoTotal                float64                            `json:"peso_total"`
 	Balancao                 float64                            `json:"balancao"`
 	AcabamentoCarcaca        []AcabamentoCarcacaResponse        `json:"acabamento_carcaca"`

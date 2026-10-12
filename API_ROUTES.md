@@ -62,6 +62,8 @@ O banco precisa possuir as colunas `fazenda.distancia_frigorifico` (numérica, e
 
 ## Abates
 
+O banco precisa possuir a coluna `abate.quantidade_total_cabecas` (inteira) para armazenar a quantidade total informada na etapa fazenda.
+
 Todos aceitam admin e usuário autenticado, exceto os `DELETE`, que são exclusivos de admin. Datas usam `AAAA-MM-DD`.
 
 | Método | Rota | Corpo / observações |
@@ -94,15 +96,16 @@ Exemplo para criar o abate (campos numéricos não podem ser negativos; IDs e lo
     "observacao": "Lote sem ocorrências"
   },
   "etapa_fazenda": {
-    "peso_total": 1000,
-    "quantidade_animal": [
-      { "denticao": 0, "qtd_animais": 0 },
-      { "denticao": 2, "qtd_animais": 10 }
-    ]
+    "quantidade_total_cabecas": 10,
+    "peso_total": 1000
   },
   "etapa_frigorifico": {
     "peso_total": 900,
     "balancao": 890,
+    "quantidade_animal": [
+      { "denticao": 0, "qtd_animais": 0 },
+      { "denticao": 2, "qtd_animais": 10 }
+    ],
     "acabamento_carcaca": [{ "acabamento": "MEDIANO", "qtd_animais": 10 }],
     "classificacao_frigorifico": [{ "classificacao": "BOI MÉDIO / NORMAL", "qtd_animais": 10 }],
     "distribuicao_peso": [{ "classificacao": "20 a 21.9", "qtd_animais": 10, "peso_total": 900 }]
@@ -111,6 +114,8 @@ Exemplo para criar o abate (campos numéricos não podem ser negativos; IDs e lo
 ```
 
 `dados_gerais.distancia_frigorifico` é opcional no abate. Quando não for enviada, será usada a distância cadastrada na fazenda; quando enviada, substituirá o valor padrão somente naquele abate.
+
+`etapa_fazenda.quantidade_total_cabecas` é informada manualmente. A lista `quantidade_animal` com as dentições pertence à `etapa_frigorifico`.
 
 Na criação e nas atualizações das etapas, os valores de classificação são exatos e aceitam somente os seguintes catálogos:
 
@@ -122,6 +127,8 @@ Na criação e nas atualizações das etapas, os valores de classificação são
 O retorno de um abate contém `id`, `proprietario_id`, `nome_proprietario`, `nome_fazenda`, `dados_gerais`, `etapa_fazenda` e `etapa_frigorifico`. `dados_gerais.observacao` pode ser `null`. Ambas as etapas incluem `fotos`; cada foto tem `id`, `etapa`, `nome_original`, `content_type`, `tamanho` e `sha256`.
 
 O relatório exige Chrome ou Chromium instalado no ambiente da API. Cada abate inicia com a página de resumo e, após a observação, o registro fotográfico começa em nova página. Abates seguintes também começam em nova página. Todas as categorias dos catálogos aparecem no relatório na ordem acima; categorias sem registro são exibidas com quantidade, peso, médias e percentuais iguais a zero, inclusive com a barra zerada nos gráficos.
+
+Uploads de anexos aceitam PNG/JPEG atÃ© 10 MiB e MP4/WebM atÃ© 50 MiB. VÃ­deos podem ser baixados normalmente, mas somente fotos PNG/JPEG sÃ£o incluÃ­das no relatÃ³rio PDF.
 
 ## Agenda
 

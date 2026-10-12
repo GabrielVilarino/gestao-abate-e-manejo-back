@@ -93,7 +93,8 @@ func TestAbateControllerCreateAcceptsDistanceOmission(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{
-		"dados_gerais":{"data_abate":"2026-09-12","fazenda_id":2,"numero_lote":1,"nome_frigorifico":"F","categoria_animal":"Bovino"}
+		"dados_gerais":{"data_abate":"2026-09-12","fazenda_id":2,"numero_lote":1,"nome_frigorifico":"F","categoria_animal":"Bovino"},
+		"etapa_fazenda":{"quantidade_total_cabecas":1}
 	}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	controller.CreateAbate(c)
@@ -121,15 +122,16 @@ func TestAbateControllerCreateValidatesRequiredDenticaoIncludingZero(t *testing.
 			controller := NewAbateController(abateControllerUseCaseStub{
 				create: func(abate *domain.Abate) error {
 					called = true
-					if len(abate.EtapaFazenda.QuantidadeAnimal) != 1 || abate.EtapaFazenda.QuantidadeAnimal[0].QtdDenticao != 0 {
-						t.Fatalf("dentição mapeada=%+v", abate.EtapaFazenda.QuantidadeAnimal)
+					if abate.EtapaFazenda.QuantidadeTotalCabecas != 3 || len(abate.EtapaFrigorifico.QuantidadeAnimal) != 1 || abate.EtapaFrigorifico.QuantidadeAnimal[0].QtdDenticao != 0 {
+						t.Fatalf("etapas mapeadas=%+v", abate)
 					}
 					return nil
 				},
 			})
 			body := fmt.Sprintf(`{
 				"dados_gerais":{"data_abate":"2026-09-12","fazenda_id":2,"numero_lote":1,"nome_frigorifico":"F","distancia_frigorifico":1,"categoria_animal":"Bovino"},
-				"etapa_fazenda":{"quantidade_animal":[{%s"qtd_animais":1}]}
+				"etapa_fazenda":{"quantidade_total_cabecas":3},
+				"etapa_frigorifico":{"quantidade_animal":[{%s"qtd_animais":1}]}
 			}`, test.denticao)
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
@@ -148,7 +150,7 @@ func TestAbateControllerCreateValidatesRequiredDenticaoIncludingZero(t *testing.
 	}
 }
 
-func TestAbateControllerUpdateEtapaFazendaValidatesRequiredDenticaoIncludingZero(t *testing.T) {
+func TestAbateControllerUpdateEtapaFrigorificoValidatesRequiredDenticaoIncludingZero(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name       string
@@ -165,7 +167,7 @@ func TestAbateControllerUpdateEtapaFazendaValidatesRequiredDenticaoIncludingZero
 		t.Run(test.name, func(t *testing.T) {
 			called := false
 			controller := NewAbateController(abateControllerUseCaseStub{
-				updateFazenda: func(id int, etapa domain.EtapaFazenda) error {
+				updateFrigorifico: func(id int, etapa domain.EtapaFrigorifico) error {
 					called = true
 					if id != 7 || len(etapa.QuantidadeAnimal) != 1 || etapa.QuantidadeAnimal[0].QtdDenticao != 0 {
 						t.Fatalf("id=%d etapa=%+v", id, etapa)
@@ -180,7 +182,7 @@ func TestAbateControllerUpdateEtapaFazendaValidatesRequiredDenticaoIncludingZero
 			c.Request = httptest.NewRequest(http.MethodPut, "/", bytes.NewBufferString(body))
 			c.Request.Header.Set("Content-Type", "application/json")
 
-			controller.UpdateEtapaFazenda(c)
+			controller.UpdateEtapaFrigorifico(c)
 
 			if w.Code != test.wantStatus {
 				t.Fatalf("status=%d body=%s", w.Code, w.Body.String())

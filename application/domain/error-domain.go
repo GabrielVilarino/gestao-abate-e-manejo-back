@@ -26,14 +26,15 @@ var (
 	ErrProprietarioInativo = errors.New("Não é possível ativar a fazenda porque o proprietário está inativo")
 
 	// Abate errors
-	ErrAbateNaoEncontrado  = errors.New("Abate não encontrado")
-	ErrFotoNaoEncontrada   = errors.New("Foto não encontrada")
-	ErrPeriodoInvalido     = errors.New("Data inicial não pode ser maior que a data final")
-	ErrEtapaFotoInvalida   = errors.New("Etapa da foto inválida")
-	ErrFormatoFotoInvalido = errors.New("Formato de foto inválido; envie PNG ou JPG")
-	ErrTamanhoFotoInvalido = errors.New("A foto deve ter no máximo 10 MB")
-	ErrDadosGeraisComFotos = errors.New("Não é possível alterar fazenda ou número do lote após o envio de fotos")
-	ErrListaAbatesInvalida = errors.New("Informe ao menos um abate para gerar o relatório")
+	ErrAbateNaoEncontrado   = errors.New("Abate não encontrado")
+	ErrFotoNaoEncontrada    = errors.New("Foto não encontrada")
+	ErrTamanhoVideoInvalido = errors.New("O vídeo deve ter no máximo 50 MB")
+	ErrPeriodoInvalido      = errors.New("Data inicial não pode ser maior que a data final")
+	ErrEtapaFotoInvalida    = errors.New("Etapa da foto inválida")
+	ErrFormatoFotoInvalido  = errors.New("Formato de foto inválido; envie PNG ou JPG")
+	ErrTamanhoFotoInvalido  = errors.New("A foto deve ter no máximo 10 MB")
+	ErrDadosGeraisComFotos  = errors.New("Não é possível alterar fazenda ou número do lote após o envio de fotos")
+	ErrListaAbatesInvalida  = errors.New("Informe ao menos um abate para gerar o relatório")
 
 	// Agenda and push errors
 	ErrAgendaNaoEncontrada     = errors.New("Agendamento não encontrado")
