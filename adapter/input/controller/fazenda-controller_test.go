@@ -35,7 +35,7 @@ func TestFazendaControllerCreateStartsActive(t *testing.T) {
 			if !fazenda.Ativo {
 				t.Fatal("nova fazenda deve iniciar ativa")
 			}
-			if fazenda.IDProprietario != 9 || fazenda.Nome != "Boa Vista" {
+			if fazenda.IDProprietario != 9 || fazenda.Nome != "Boa Vista" || fazenda.DistanciaFrigorifico != 25.5 || fazenda.QuantidadeRebanho != 120 {
 				t.Fatalf("fazenda recebida = %+v", fazenda)
 			}
 			return nil
@@ -43,7 +43,7 @@ func TestFazendaControllerCreateStartsActive(t *testing.T) {
 	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":9}`))
+	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","distancia_frigorifico":25.5,"quantidade_rebanho":120,"id_proprietario":9}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	controller.CreateFazenda(c)
 	if w.Code != http.StatusOK {
@@ -120,7 +120,7 @@ func TestFazendaControllerRejectsNegativeOwnerIDOnCreate(t *testing.T) {
 	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":-1}`))
+	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","distancia_frigorifico":25.5,"quantidade_rebanho":120,"id_proprietario":-1}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	controller.CreateFazenda(c)
 	if w.Code != http.StatusBadRequest {
@@ -139,7 +139,7 @@ func TestFazendaControllerUpdateDoesNotAcceptOwnerChange(t *testing.T) {
 	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodPut, "/", bytes.NewBufferString(`{"id":11,"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","id_proprietario":99}`))
+	c.Request = httptest.NewRequest(http.MethodPut, "/", bytes.NewBufferString(`{"id":11,"nome":"Boa Vista","cidade":"Gurupi","inscricao_rural":"IR-1","distancia_frigorifico":25.5,"quantidade_rebanho":120,"id_proprietario":99}`))
 	c.Request.Header.Set("Content-Type", "application/json")
 	controller.UpdateFazenda(c)
 	if w.Code != http.StatusOK {

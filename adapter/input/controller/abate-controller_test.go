@@ -60,7 +60,7 @@ func (s abateControllerUseCaseStub) GenerateAbateReport(ctx context.Context, ids
 	return s.generateReport(ctx, ids)
 }
 
-func TestAbateControllerCreateRequiresLotAndDistance(t *testing.T) {
+func TestAbateControllerCreateRequiresLot(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	controller := NewAbateController(abateControllerUseCaseStub{
 		create: func(*domain.Abate) error {
@@ -76,6 +76,28 @@ func TestAbateControllerCreateRequiresLotAndDistance(t *testing.T) {
 	c.Request.Header.Set("Content-Type", "application/json")
 	controller.CreateAbate(c)
 	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+}
+
+func TestAbateControllerCreateAcceptsDistanceOmission(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	controller := NewAbateController(abateControllerUseCaseStub{
+		create: func(abate *domain.Abate) error {
+			if abate.DadosGeraisAbate.DistanciaFrigorifico != 0 {
+				t.Fatalf("distância omitida deveria ser resolvida pelo padrão da fazenda: %+v", abate.DadosGeraisAbate)
+			}
+			return nil
+		},
+	})
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{
+		"dados_gerais":{"data_abate":"2026-09-12","fazenda_id":2,"numero_lote":1,"nome_frigorifico":"F","categoria_animal":"Bovino"}
+	}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+	controller.CreateAbate(c)
+	if w.Code != http.StatusCreated {
 		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
 	}
 }

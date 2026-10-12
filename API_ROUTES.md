@@ -52,11 +52,13 @@ Todos os endpoints abaixo aceitam admin e usuário autenticado.
 
 | Método | Rota | Corpo / resposta |
 | --- | --- | --- |
-| `POST` | `/api/v1/fazenda` | `{ "nome":"...", "cidade":"...", "inscricao_rural":"...", "observacao":"...", "id_proprietario":1 }`. |
-| `GET` | `/api/v1/fazendas/:idProprietario` | Retorna `{ "fazendas": [{ "id", "nome", "cidade", "inscricao_rural", "observacao", "id_proprietario", "ativo" }] }`. |
-| `PUT` | `/api/v1/fazenda` | `{ "id":1, "nome":"...", "cidade":"...", "inscricao_rural":"...", "observacao":"..." }`. |
+| `POST` | `/api/v1/fazenda` | `{ "nome":"...", "cidade":"...", "inscricao_rural":"...", "observacao":"...", "distancia_frigorifico":25.5, "quantidade_rebanho":120, "id_proprietario":1 }`. Distância em quilômetros e quantidade de rebanho em animais. |
+| `GET` | `/api/v1/fazendas/:idProprietario` | Retorna `{ "fazendas": [{ "id", "nome", "cidade", "inscricao_rural", "observacao", "distancia_frigorifico", "quantidade_rebanho", "id_proprietario", "ativo" }] }`. |
+| `PUT` | `/api/v1/fazenda` | `{ "id":1, "nome":"...", "cidade":"...", "inscricao_rural":"...", "observacao":"...", "distancia_frigorifico":25.5, "quantidade_rebanho":120 }`. |
 | `PUT` | `/api/v1/fazenda/activate/:id` | Sem corpo. Pode retornar `409` se o proprietário estiver inativo. |
 | `PUT` | `/api/v1/fazenda/deactivate/:id` | Sem corpo. |
+
+O banco precisa possuir as colunas `fazenda.distancia_frigorifico` (numérica, em quilômetros) e `fazenda.quantidade_rebanho` (inteira) para suportar esses campos.
 
 ## Abates
 
@@ -107,6 +109,8 @@ Exemplo para criar o abate (campos numéricos não podem ser negativos; IDs e lo
   }
 }
 ```
+
+`dados_gerais.distancia_frigorifico` é opcional no abate. Quando não for enviada, será usada a distância cadastrada na fazenda; quando enviada, substituirá o valor padrão somente naquele abate.
 
 Na criação e nas atualizações das etapas, os valores de classificação são exatos e aceitam somente os seguintes catálogos:
 

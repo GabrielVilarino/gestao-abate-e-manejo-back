@@ -9,13 +9,15 @@ type FazendaSuccessResponse struct {
 }
 
 type FazendaDataResponse struct {
-	ID             int    `json:"id"`
-	Nome           string `json:"nome"`
-	Cidade         string `json:"cidade"`
-	InscricaoRural string `json:"inscricao_rural"`
-	Observacao     string `json:"observacao"`
-	IDProprietario int    `json:"id_proprietario"`
-	Ativo          bool   `json:"ativo"`
+	ID                   int     `json:"id"`
+	Nome                 string  `json:"nome"`
+	Cidade               string  `json:"cidade"`
+	InscricaoRural       string  `json:"inscricao_rural"`
+	Observacao           string  `json:"observacao"`
+	DistanciaFrigorifico float64 `json:"distancia_frigorifico"`
+	QuantidadeRebanho    int     `json:"quantidade_rebanho"`
+	IDProprietario       int     `json:"id_proprietario"`
+	Ativo                bool    `json:"ativo"`
 }
 
 type GetFazendasResponse struct {

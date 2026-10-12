@@ -5,7 +5,7 @@ type DadosGeraisAbateRequest struct {
 	FazendaID            int     `json:"fazenda_id" binding:"required,gt=0"`
 	NumeroLote           int     `json:"numero_lote" binding:"required,gt=0"`
 	NomeFrigorifico      string  `json:"nome_frigorifico" binding:"required"`
-	DistanciaFrigorifico float64 `json:"distancia_frigorifico" binding:"required,gt=0"`
+	DistanciaFrigorifico float64 `json:"distancia_frigorifico" binding:"omitempty,gt=0"`
 	CategoriaAnimal      string  `json:"categoria_animal" binding:"required"`
 	PrecoFunrural        float64 `json:"preco_funrural" binding:"gte=0"`
 	PrecoSemFunrural     float64 `json:"preco_sem_funrural" binding:"gte=0"`

@@ -29,12 +29,14 @@ func (f *FazendaController) CreateFazenda(c *gin.Context) {
 	}
 
 	fazenda := &domain.Fazenda{
-		Nome:           requestData.Nome,
-		Cidade:         requestData.Cidade,
-		InscricaoRural: requestData.InscricaoRural,
-		Observacao:     requestData.Observacao,
-		IDProprietario: requestData.IDProprietario,
-		Ativo:          true,
+		Nome:                 requestData.Nome,
+		Cidade:               requestData.Cidade,
+		InscricaoRural:       requestData.InscricaoRural,
+		Observacao:           requestData.Observacao,
+		DistanciaFrigorifico: requestData.DistanciaFrigorifico,
+		QuantidadeRebanho:    requestData.QuantidadeRebanho,
+		IDProprietario:       requestData.IDProprietario,
+		Ativo:                true,
 	}
 	if err := f.FazendaUseCase.CreateFazenda(fazenda); err != nil {
 		logger.Error("[FAZENDA] - CreateFazenda", err)
@@ -69,13 +71,15 @@ func (f *FazendaController) GetFazendas(c *gin.Context) {
 	fazendasData := make([]response.FazendaDataResponse, len(*fazendas))
 	for i, fazenda := range *fazendas {
 		fazendasData[i] = response.FazendaDataResponse{
-			ID:             fazenda.ID,
-			Nome:           fazenda.Nome,
-			Cidade:         fazenda.Cidade,
-			InscricaoRural: fazenda.InscricaoRural,
-			Observacao:     fazenda.Observacao,
-			IDProprietario: fazenda.IDProprietario,
-			Ativo:          fazenda.Ativo,
+			ID:                   fazenda.ID,
+			Nome:                 fazenda.Nome,
+			Cidade:               fazenda.Cidade,
+			InscricaoRural:       fazenda.InscricaoRural,
+			Observacao:           fazenda.Observacao,
+			DistanciaFrigorifico: fazenda.DistanciaFrigorifico,
+			QuantidadeRebanho:    fazenda.QuantidadeRebanho,
+			IDProprietario:       fazenda.IDProprietario,
+			Ativo:                fazenda.Ativo,
 		}
 	}
 	c.JSON(http.StatusOK, response.GetFazendasResponse{Fazendas: fazendasData})
@@ -90,11 +94,13 @@ func (f *FazendaController) UpdateFazenda(c *gin.Context) {
 	}
 
 	fazenda := &domain.Fazenda{
-		ID:             requestData.ID,
-		Nome:           requestData.Nome,
-		Cidade:         requestData.Cidade,
-		InscricaoRural: requestData.InscricaoRural,
-		Observacao:     requestData.Observacao,
+		ID:                   requestData.ID,
+		Nome:                 requestData.Nome,
+		Cidade:               requestData.Cidade,
+		InscricaoRural:       requestData.InscricaoRural,
+		Observacao:           requestData.Observacao,
+		DistanciaFrigorifico: requestData.DistanciaFrigorifico,
+		QuantidadeRebanho:    requestData.QuantidadeRebanho,
 	}
 	if err := f.FazendaUseCase.UpdateFazenda(fazenda); err != nil {
 		logger.Error("[FAZENDA] - UpdateFazenda", err)

@@ -35,7 +35,10 @@ func (a AbateRepository) CreateAbate(abate *domain.Abate) error {
 			distancia_frigorifico, categoria_animal, preco_funrural,
 			preco_sem_funrural, peso_total_fazenda,
 			peso_total_frigorifico, balancao, observacao
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		)
+		SELECT $1,$2,$3,$4,COALESCE(NULLIF($5, 0), f.distancia_frigorifico),$6,$7,$8,$9,$10,$11,$12
+		FROM public.fazenda f
+		WHERE f.id = $1
 		RETURNING id`,
 		d.FazendaID, d.NumeroLote, d.DataAbate, d.NomeFrigorifico,
 		d.DistanciaFrigorifico, d.CategoriaAnimal, d.PrecoFunrural,
@@ -174,9 +177,9 @@ func (a AbateRepository) UpdateDadosGeraisAbate(abateID int, dados domain.DadosG
 			WHERE a.id=$10
 			FOR UPDATE OF a
 		), atualizado AS (
-			UPDATE public.abate SET
+			UPDATE public.abate a SET
 				fazenda_id=$1, numero_lote=$2, data_abate=$3, nome_frigorifico=$4,
-				distancia_frigorifico=$5, categoria_animal=$6,
+				distancia_frigorifico=COALESCE(NULLIF($5, 0), (SELECT f.distancia_frigorifico FROM public.fazenda f WHERE f.id=$1)), categoria_animal=$6,
 				preco_funrural=$7, preco_sem_funrural=$8, observacao=$9
 			WHERE id IN (
 				SELECT id FROM estado WHERE NOT (caminho_alterado AND possui_fotos)

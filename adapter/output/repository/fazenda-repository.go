@@ -16,13 +16,15 @@ func NewFazendaRepository(db *sql.DB) FazendaRepository {
 }
 
 func (f FazendaRepository) CreateFazenda(fazenda *domain.Fazenda) error {
-	query := `INSERT INTO public.fazenda (nome, cidade, inscricao_rural, observacao, id_proprietario, ativo) VALUES ($1, $2, $3, $4, $5, $6)`
+	query := `INSERT INTO public.fazenda (nome, cidade, inscricao_rural, observacao, distancia_frigorifico, quantidade_rebanho, id_proprietario, ativo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := f.db.Exec(
 		query,
 		fazenda.Nome,
 		fazenda.Cidade,
 		fazenda.InscricaoRural,
 		fazenda.Observacao,
+		fazenda.DistanciaFrigorifico,
+		fazenda.QuantidadeRebanho,
 		fazenda.IDProprietario,
 		fazenda.Ativo,
 	)
@@ -30,7 +32,7 @@ func (f FazendaRepository) CreateFazenda(fazenda *domain.Fazenda) error {
 }
 
 func (f FazendaRepository) GetFazendas(idProprietario int) (*[]domain.Fazenda, error) {
-	query := `SELECT id, nome, cidade, inscricao_rural, observacao, id_proprietario, ativo FROM public.fazenda WHERE id_proprietario = $1`
+	query := `SELECT id, nome, cidade, inscricao_rural, observacao, distancia_frigorifico, quantidade_rebanho, id_proprietario, ativo FROM public.fazenda WHERE id_proprietario = $1`
 	rows, err := f.db.Query(query, idProprietario)
 	if err != nil {
 		return nil, err
@@ -46,6 +48,8 @@ func (f FazendaRepository) GetFazendas(idProprietario int) (*[]domain.Fazenda, e
 			&fazenda.Cidade,
 			&fazenda.InscricaoRural,
 			&fazenda.Observacao,
+			&fazenda.DistanciaFrigorifico,
+			&fazenda.QuantidadeRebanho,
 			&fazenda.IDProprietario,
 			&fazenda.Ativo,
 		); err != nil {
@@ -61,8 +65,8 @@ func (f FazendaRepository) GetFazendas(idProprietario int) (*[]domain.Fazenda, e
 }
 
 func (f FazendaRepository) UpdateFazenda(fazenda *domain.Fazenda) error {
-	query := `UPDATE public.fazenda SET nome = $1, cidade = $2, inscricao_rural = $3, observacao = $4 WHERE id = $5`
-	result, err := f.db.Exec(query, fazenda.Nome, fazenda.Cidade, fazenda.InscricaoRural, fazenda.Observacao, fazenda.ID)
+	query := `UPDATE public.fazenda SET nome = $1, cidade = $2, inscricao_rural = $3, observacao = $4, distancia_frigorifico = $5, quantidade_rebanho = $6 WHERE id = $7`
+	result, err := f.db.Exec(query, fazenda.Nome, fazenda.Cidade, fazenda.InscricaoRural, fazenda.Observacao, fazenda.DistanciaFrigorifico, fazenda.QuantidadeRebanho, fazenda.ID)
 	if err != nil {
 		return err
 	}

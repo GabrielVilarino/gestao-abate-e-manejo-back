@@ -60,9 +60,9 @@ func TestFazendaRepositoryUpdateDoesNotChangeStatus(t *testing.T) {
 	fazenda := &domain.Fazenda{
 		ID: 11, Nome: "Boa Vista", Cidade: "Gurupi", InscricaoRural: "IR-1", Observacao: "", Ativo: true,
 	}
-	query := `UPDATE public\.fazenda SET nome = \$1, cidade = \$2, inscricao_rural = \$3, observacao = \$4 WHERE id = \$5`
+	query := `UPDATE public\.fazenda SET nome = \$1, cidade = \$2, inscricao_rural = \$3, observacao = \$4, distancia_frigorifico = \$5, quantidade_rebanho = \$6 WHERE id = \$7`
 	mock.ExpectExec(query).
-		WithArgs(fazenda.Nome, fazenda.Cidade, fazenda.InscricaoRural, fazenda.Observacao, fazenda.ID).
+		WithArgs(fazenda.Nome, fazenda.Cidade, fazenda.InscricaoRural, fazenda.Observacao, fazenda.DistanciaFrigorifico, fazenda.QuantidadeRebanho, fazenda.ID).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 
 	if err := NewFazendaRepository(db).UpdateFazenda(fazenda); err != nil {
