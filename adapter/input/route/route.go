@@ -16,6 +16,7 @@ func InitRoutes(
 	proprietarioController *controller.ProprietarioController,
 	fazendaController *controller.FazendaController,
 	abateController *controller.AbateController,
+	dashboardController *controller.DashboardController,
 	agendaController *controller.AgendaController,
 	tokenPort output.TokenPort,
 	userPort output.UserPort,
@@ -31,5 +32,5 @@ func InitRoutes(
 	auth := middleware.Authenticate(tokenPort, userPort)
 	admin := middleware.AuthorizeRoles(domain.RoleAdmin)
 	adminOrUser := middleware.AuthorizeRoles(domain.RoleAdmin, domain.RoleUser)
-	initRoutesv1(api, userController, proprietarioController, fazendaController, abateController, agendaController, auth, admin, adminOrUser)
+	initRoutesv1(api, userController, proprietarioController, fazendaController, abateController, dashboardController, agendaController, auth, admin, adminOrUser)
 }

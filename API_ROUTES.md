@@ -64,6 +64,64 @@ O banco precisa possuir as colunas `fazenda.distancia_frigorifico` (numérica, e
 
 O banco precisa possuir a coluna `abate.quantidade_total_cabecas` (inteira) para armazenar a quantidade total informada na etapa fazenda.
 
+| `GET` | `/api/v1/dashboard/abates` | Dashboard agregado. Filtros opcionais: `proprietario_id`, `fazenda_id`, `data_inicio` e `data_fim`; datas inclusivas no formato `AAAA-MM-DD`. Retorna resumo geral, agrupamento por fazenda, evolução diária e agrupamento por categoria animal. |
+
+Exemplo de retorno do dashboard:
+
+```json
+{
+  "resumo": {
+    "total_abates": 25,
+    "total_cabecas": 2300,
+    "media_cabecas_por_abate": 92,
+    "peso_medio_fazenda": 510.4,
+    "peso_medio_frigorifico": 420.8,
+    "rendimento_medio_carcaca": 82.45,
+    "distancia_media_frigorifico": 34.2
+  },
+  "por_fazenda": [
+    {
+      "fazenda_id": 1,
+      "nome_fazenda": "Fazenda Boa Vista",
+      "total_abates": 12,
+      "total_cabecas": 1150,
+      "media_cabecas_por_abate": 95.83
+    },
+    {
+      "fazenda_id": 2,
+      "nome_fazenda": "Fazenda Santa Maria",
+      "total_abates": 13,
+      "total_cabecas": 1150,
+      "media_cabecas_por_abate": 88.46
+    }
+  ],
+  "evolucao": [
+    {
+      "data": "2026-01-10",
+      "total_abates": 2,
+      "total_cabecas": 180
+    },
+    {
+      "data": "2026-01-11",
+      "total_abates": 1,
+      "total_cabecas": 95
+    }
+  ],
+  "por_categoria_animal": [
+    {
+      "categoria_animal": "Bovino",
+      "total_abates": 20,
+      "total_cabecas": 1850
+    },
+    {
+      "categoria_animal": "Novilho",
+      "total_abates": 5,
+      "total_cabecas": 450
+    }
+  ]
+}
+```
+
 Todos aceitam admin e usuário autenticado, exceto os `DELETE`, que são exclusivos de admin. Datas usam `AAAA-MM-DD`.
 
 | Método | Rota | Corpo / observações |

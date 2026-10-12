@@ -69,6 +69,7 @@ func TestInitRoutesRegistersV1Routes(t *testing.T) {
 		&controller.ProprietarioController{},
 		&controller.FazendaController{},
 		&controller.AbateController{},
+		nil,
 		&controller.AgendaController{},
 		routeTokenPortStub{validate: func(string) (*domain.User, error) {
 			return &domain.User{Ativo: true}, nil
@@ -147,6 +148,7 @@ func TestAbateRoutesRequireAuthenticationAndActiveUser(t *testing.T) {
 				&controller.ProprietarioController{},
 				&controller.FazendaController{},
 				&controller.AbateController{},
+				nil,
 				&controller.AgendaController{},
 				routeTokenPortStub{validate: func(string) (*domain.User, error) {
 					return &domain.User{ID: 7}, tc.validateErr
@@ -301,6 +303,7 @@ func newRouteTestRouter(role int, active bool) *gin.Engine {
 		controller.NewProprietarioController(routeProprietarioUseCaseStub{}),
 		&controller.FazendaController{},
 		&controller.AbateController{},
+		nil,
 		&controller.AgendaController{},
 		routeTokenPortStub{validate: func(string) (*domain.User, error) {
 			return &domain.User{ID: 7}, nil

@@ -11,6 +11,7 @@ func initRoutesv1(
 	proprietarioController *controller.ProprietarioController,
 	fazendaController *controller.FazendaController,
 	abateController *controller.AbateController,
+	dashboardController *controller.DashboardController,
 	agendaController *controller.AgendaController,
 	authMiddleware gin.HandlerFunc,
 	adminMiddleware gin.HandlerFunc,
@@ -128,6 +129,10 @@ func initRoutesv1(
 		abate.GET(
 			"/abates",
 			abateController.FindAbates,
+		)
+		abate.GET(
+			"/dashboard/abates",
+			dashboardController.GetDashboardAbates,
 		)
 		abate.POST(
 			"/abates/relatorio",

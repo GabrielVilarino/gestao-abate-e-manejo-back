@@ -65,6 +65,7 @@ func main() {
 		proprietarioController,
 		fazendaController,
 		abateController,
+		initDashboardController(db),
 		agendaController,
 		tokenPort,
 		userPort,
@@ -75,6 +76,12 @@ func main() {
 		logger.Error("Erro ao iniciar o servidor", err)
 		return
 	}
+}
+
+func initDashboardController(db *sql.DB) *controller.DashboardController {
+	dashboardPort := repository.NewDashboardRepository(db)
+	dashboardService := service.NewDashboardService(dashboardPort)
+	return controller.NewDashboardController(dashboardService)
 }
 
 func initAgendaController(db *sql.DB, workerCtx context.Context) (*controller.AgendaController, error) {
