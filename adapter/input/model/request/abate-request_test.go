@@ -20,7 +20,7 @@ func TestAbateRequestCatalogValidation(t *testing.T) {
 		{name: "dentição oito válida", value: QtdDenticaoRequest{QtdDenticao: &eight}, valid: true},
 		{name: "dentição ausente", value: QtdDenticaoRequest{}, valid: false},
 		{name: "dentição inválida", value: QtdDenticaoRequest{QtdDenticao: &one}, valid: false},
-		{name: "acabamento válido", value: AcabamentoCarcacaRequest{Acabamento: "MEDIANO UP"}, valid: true},
+		{name: "acabamento válido", value: AcabamentoCarcacaRequest{Acabamento: "ESCASSO POSITIVA"}, valid: true},
 		{name: "acabamento inválido", value: AcabamentoCarcacaRequest{Acabamento: "MEDIANO up"}, valid: false},
 		{name: "classificação válida", value: ClassificacaoFrigorificoRequest{Classificacao: "BOI MÉDIO / NORMAL"}, valid: true},
 		{name: "classificação inválida", value: ClassificacaoFrigorificoRequest{Classificacao: "NORMAL"}, valid: false},

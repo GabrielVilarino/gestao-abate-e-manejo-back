@@ -45,18 +45,23 @@ type photoPage struct {
 
 func NewChromedpPDFGenerator() (*ChromedpPDFGenerator, error) {
 	functions := template.FuncMap{
-		"formatDate":    func(value time.Time) string { return value.Format("02/01/2006") },
-		"formatNumber":  formatNumber,
-		"formatPercent": func(value float64) string { return formatNumber(value, 1) + "%" },
-		"formatRatio":   func(value float64) string { return formatNumber(value*100, 1) + "%" },
-		"barHeight":     barHeight,
-		"barColor":      barColor,
-		"upper":         strings.ToUpper,
-		"classRange":    classificationRange,
-		"classPenalty":  classificationPenalty,
-		"photoPages":    buildPhotoPages,
-		"hasValue":      func(value float64) bool { return value != 0 },
-		"safeURL":       func(value string) template.URL { return template.URL(value) },
+		"formatDate":                 func(value time.Time) string { return value.Format("02/01/2006") },
+		"formatNumber":               formatNumber,
+		"formatPercent":              func(value float64) string { return formatNumber(value, 1) + "%" },
+		"formatRatio":                func(value float64) string { return formatNumber(value*100, 1) + "%" },
+		"barHeight":                  barHeight,
+		"maxDistributionWeight":      maxDistributionWeight,
+		"maxDistributionHeads":       maxDistributionHeads,
+		"distributionBarHeight":      distributionBarHeight,
+		"distributionHeadsBarHeight": distributionHeadsBarHeight,
+		"denticaoBarColor":           denticaoBarColor,
+		"acabamentoBarColor":         acabamentoBarColor,
+		"upper":                      strings.ToUpper,
+		"classRange":                 classificationRange,
+		"classPenalty":               classificationPenalty,
+		"photoPages":                 buildPhotoPages,
+		"hasValue":                   func(value float64) bool { return value != 0 },
+		"safeURL":                    func(value string) template.URL { return template.URL(value) },
 	}
 	parsed, err := template.New("abate-report").Funcs(functions).Parse(reportTemplateHTML)
 	if err != nil {
@@ -157,9 +162,64 @@ func barHeight(value float64) string {
 	return strconv.FormatFloat(value, 'f', 1, 64) + "%"
 }
 
-func barColor(index int) string {
-	colors := []string{"#b9bdc3", "#ef2e35", "#f5822a", "#f5a623", "#6e9e54", "#66788a"}
-	return colors[index%len(colors)]
+func maxDistributionWeight(items []output.AbateReportDistribuicaoPeso) float64 {
+	var maxValue float64
+	for _, item := range items {
+		if item.PesoTotal > maxValue {
+			maxValue = item.PesoTotal
+		}
+	}
+	return maxValue
+}
+
+func maxDistributionHeads(items []output.AbateReportDistribuicaoPeso) float64 {
+	var maxValue float64
+	for _, item := range items {
+		if float64(item.Quantidade) > maxValue {
+			maxValue = float64(item.Quantidade)
+		}
+	}
+	return maxValue
+}
+
+func distributionBarHeight(value, maxValue float64) string {
+	if maxValue <= 0 {
+		return barHeight(0)
+	}
+	return barHeight(value / maxValue * 100)
+}
+
+func distributionHeadsBarHeight(value int, maxValue float64) string {
+	return distributionBarHeight(float64(value), maxValue)
+}
+
+func denticaoBarColor(denticao int) string {
+	colors := map[int]string{
+		0: "#1b5e20",
+		2: "#43a047",
+		4: "#9ccc65",
+		6: "#ef5350",
+		8: "#e53935",
+	}
+	if color, ok := colors[denticao]; ok {
+		return color
+	}
+	return "#9e9e9e"
+}
+
+func acabamentoBarColor(acabamento string) string {
+	colors := map[string]string{
+		"AUSENTE":          "#e53935",
+		"ESCASSO":          "#ef5350",
+		"ESCASSO POSITIVA": "#f57c00",
+		"MEDIANO":          "#fbc02d",
+		"UNIFORME":         "#43a047",
+		"EXCESSIVO":        "#1b5e20",
+	}
+	if color, ok := colors[strings.ToUpper(strings.TrimSpace(acabamento))]; ok {
+		return color
+	}
+	return "#9e9e9e"
 }
 
 func classificationRange(classification string) string {

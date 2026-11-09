@@ -60,6 +60,28 @@ func TestFormatNumberUsesBrazilianSeparators(t *testing.T) {
 	}
 }
 
+func TestReportBarColorsFollowQualityPalettes(t *testing.T) {
+	if got := denticaoBarColor(0); got != "#1b5e20" || denticaoBarColor(4) != "#9ccc65" || denticaoBarColor(8) != "#e53935" {
+		t.Fatalf("paleta de dentição inesperada: 0=%s 4=%s 8=%s", got, denticaoBarColor(4), denticaoBarColor(8))
+	}
+	acabamentos := []struct {
+		name  string
+		color string
+	}{
+		{"AUSENTE", "#e53935"},
+		{"ESCASSO", "#ef5350"},
+		{"ESCASSO POSITIVA", "#f57c00"},
+		{"MEDIANO", "#fbc02d"},
+		{"UNIFORME", "#43a047"},
+		{"EXCESSIVO", "#1b5e20"},
+	}
+	for _, test := range acabamentos {
+		if got := acabamentoBarColor(test.name); got != test.color {
+			t.Fatalf("cor de %s = %s, esperada %s", test.name, got, test.color)
+		}
+	}
+}
+
 func TestReportTemplateDoesNotClipWeightDistributionRows(t *testing.T) {
 	if strings.Contains(reportTemplateHTML, ".weight-card { height:86px") {
 		t.Fatal("card de distribuição de peso ainda possui altura fixa insuficiente")
@@ -71,14 +93,43 @@ func TestReportTemplateDoesNotClipWeightDistributionRows(t *testing.T) {
 
 func TestReportTemplateKeepsBottomSpacingInSummaryCards(t *testing.T) {
 	for _, expected := range []string{
-		".bar-chart { height:106px; padding:10px 18px 5px;",
-		".classification-wrap { padding:5px 13px 6px;",
+		"grid-template-rows:175px 175px 160px;",
+		".bar-chart { height:150px; padding:10px 52px 7px;",
+		".classification-wrap { padding:9px 14px 8px;",
 		".classification-wrap th { padding:3px 5px;",
-		".classification-wrap td { padding:2px 5px;",
+		".classification-wrap td { padding:2.5px 5px;",
 	} {
 		if !strings.Contains(reportTemplateHTML, expected) {
 			t.Fatalf("espaçamento inferior ausente no template: %q", expected)
 		}
+	}
+}
+
+func TestReportTemplateRendersWeightAndHeadsDistributionChart(t *testing.T) {
+	generator, err := NewChromedpPDFGenerator()
+	if err != nil {
+		t.Fatal(err)
+	}
+	report := output.AbateReport{
+		DistribuicoesPeso: []output.AbateReportDistribuicaoPeso{
+			{Classificacao: "18 a 19.9", Quantidade: 2, PesoTotal: 900},
+			{Classificacao: "20 a 21.9", Quantidade: 4, PesoTotal: 1900},
+			{Classificacao: "22 a 23.9", Quantidade: 3, PesoTotal: 1500},
+			{Classificacao: "acima de 24", Quantidade: 1, PesoTotal: 500},
+		},
+	}
+	html, err := generator.renderHTML([]output.AbateReport{report})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(html, `class="distribution-group"`) != 4 {
+		t.Fatalf("grupos de distribuiÃ§Ã£o=%d, esperado=4", strings.Count(html, `class="distribution-group"`))
+	}
+	if !strings.Contains(html, `class="distribution-bar weight"`) || !strings.Contains(html, `class="distribution-bar heads"`) {
+		t.Fatal("grÃ¡fico agrupado de peso e cabeÃ§as nÃ£o foi renderizado")
+	}
+	if !strings.Contains(html, `--distribution-height:100.0%`) {
+		t.Fatal("grÃ¡fico nÃ£o normalizou as maiores barras")
 	}
 }
 
@@ -115,13 +166,12 @@ func TestReportTemplateRendersBarsForZeroValues(t *testing.T) {
 		"4 dentes</h3><small>24 a 36 meses</small><b>0 animais</b>",
 		"6 dentes</h3><small>36 a 48 meses</small><b>0 animais</b>",
 		"8 dentes</h3><small>acima de 48 meses</small><b>0 animais</b>",
-		"0 de 18 a 19.9 arrobas",
-		"0 de 20 a 21.9 arrobas",
-		"0 de 22 a 23.9 arrobas",
-		"0 acima de 24 arrobas",
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("linha zerada não renderizada: %q", expected)
 		}
+	}
+	if strings.Contains(html, "Detalhamento da distribuição de peso") {
+		t.Fatal("detalhamento da distribuição de peso não deveria ser renderizado")
 	}
 }

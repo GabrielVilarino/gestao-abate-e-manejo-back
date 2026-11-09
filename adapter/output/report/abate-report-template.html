@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
@@ -27,39 +28,71 @@
     .metric .label { margin-bottom:7px; overflow:hidden; text-overflow:ellipsis; font-size:6.6px; white-space:nowrap; }
     .metric strong { display:block; white-space:nowrap; font-size:14px; }
     .metric.price strong { font-size:12px; }
-    .grid { display:grid; grid-template-columns:1.05fr 1fr; grid-template-rows:136px 136px; gap:8px 10px; margin-top:8px; }
+    .grid { display:grid; grid-template-columns:65fr 35fr; grid-template-rows:175px 175px 160px; grid-template-areas:"denticao denticao" "acabamento acabamento" "classification gastric"; gap:10px 10px; margin-top:8px; }
+    .grid > section:nth-child(1) { grid-area:denticao; }
+    .grid > section:nth-child(2) { grid-area:gastric; }
+    .grid > section:nth-child(3) { grid-area:acabamento; }
+    .grid > section:nth-child(4) { grid-area:classification; }
     .section { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.96); }
-    .section h2 { height:29px; margin:0; padding:8px 14px 0; background:var(--pale); font-size:14px; text-transform:uppercase; }
-    .bar-chart { height:106px; padding:10px 18px 5px; display:flex; align-items:flex-end; gap:12px; }
+    .section h2 { height:30px; margin:0; padding:8px 14px 0; background:var(--pale); font-size:14px; text-transform:uppercase; }
+    .bar-chart { height:150px; padding:10px 52px 7px; display:flex; align-items:flex-end; gap:28px; }
     .bar-item { flex:1; min-width:0; text-align:center; }
-    .plot { position:relative; height:53px; border-bottom:1px solid #c8cdd3; display:flex; align-items:flex-end; justify-content:center; }
-    .track { position:relative; width:30px; height:49px; border-radius:4px 4px 0 0; background:#eef0f2; overflow:visible; }
+    .plot { position:relative; height:99px; border-bottom:1px solid #c8cdd3; display:flex; align-items:flex-end; justify-content:center; }
+    .track { position:relative; width:44px; height:94px; border-radius:4px 4px 0 0; background:#eef0f2; overflow:visible; }
     .fill { position:absolute; inset:auto 0 0; height:var(--height); min-height:0; border-radius:4px 4px 0 0; background:var(--color); }
     .percent { position:absolute; left:50%; bottom:calc(var(--height) + 4px); transform:translateX(-50%); font-size:10px; font-weight:700; white-space:nowrap; }
     .bar-item h3 { margin:4px 0 1px; overflow:hidden; text-overflow:ellipsis; font-size:8px; white-space:nowrap; }
     .bar-item small { display:block; color:var(--muted); font-size:7px; white-space:nowrap; }
     .bar-item b { display:block; margin-top:3px; font-size:8px; }
-    .gastric { padding:7px 13px; }
-    .gastric-row { min-height:18px; display:flex; justify-content:space-between; align-items:center; padding:0 8px; color:var(--muted); font-size:9px; }
+    .gastric { padding:12px 14px; }
+    .gastric-row { min-height:22px; display:flex; justify-content:space-between; align-items:center; padding:0 9px; color:var(--muted); font-size:9px; }
     .gastric-row strong { color:var(--ink); font-size:10px; }
-    .gastric-row.highlight { margin:2px 0; border-radius:7px; background:var(--pale); color:var(--ink); font-weight:700; }
+    .gastric-row.highlight { margin:2px 0; border-radius:6px; background:var(--pale); color:var(--ink); font-weight:700; }
     .gastric-row.highlight strong { color:var(--red); }
     .gastric-row.green { background:#edf5e9; }
     .gastric-row.green strong { color:var(--green); }
-    .finishing .bar-chart { gap:10px; padding-top:8px; }
-    .finishing .plot { height:56px; }
-    .finishing .track { width:27px; height:52px; }
-    .finishing .bar-item h3 { font-size:7.5px; }
-    .finishing .bar-item small { margin-top:4px; }
-    .classification-wrap { padding:5px 13px 6px; }
-    .classification-wrap th { padding:3px 5px; }
-    .classification-wrap td { padding:2px 5px; }
+    .finishing .bar-chart { gap:18px; padding-top:10px; }
+    .finishing .plot { height:99px; }
+    .finishing .track { width:37px; height:94px; }
+    .finishing .bar-item h3 { font-size:8px; }
+    .finishing .bar-item small { margin-top:5px; }
+    .classification-wrap { padding:9px 14px 8px; }
+    .classification-wrap table { font-size:8px; }
+    .classification-wrap th { padding:3px 5px; font-size:6px; }
+    .classification-wrap td { padding:2.5px 5px; }
     table { width:100%; border-collapse:collapse; font-size:8.5px; }
     th { padding:4px 5px; background:var(--soft); color:var(--muted); text-align:left; font-size:6.4px; text-transform:uppercase; }
     td { padding:3.6px 5px; border-bottom:1px solid var(--line); }
     td:first-child { font-weight:700; }
     tr.total td { background:var(--pale); font-weight:700; }
     .source-note { margin-top:2px; color:var(--muted); font-size:6px; }
+    .distribution-card { height:119px; margin-top:8px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.96); }
+    .distribution-card h2 { height:21px; margin:0; padding:5px 14px 0; background:var(--pale); text-align:center; font-size:10px; text-transform:uppercase; }
+    .distribution-legend { height:15px; display:flex; justify-content:center; align-items:center; gap:18px; color:var(--muted); font-size:6.5px; }
+    .distribution-key::before { content:""; display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:-1px; border-radius:2px; background:var(--key-color); }
+    .distribution-chart { height:82px; padding:0 42px 4px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; }
+    .distribution-group { min-width:0; flex:1; text-align:center; }
+    .distribution-bars { height:67px; display:flex; align-items:flex-end; justify-content:center; gap:5px; border-bottom:1px solid #c8cdd3; }
+    .distribution-bar-wrap { width:28px; height:61px; display:flex; align-items:flex-end; justify-content:center; }
+    .distribution-bar { position:relative; width:100%; height:var(--distribution-height); min-height:0; border-radius:3px 3px 0 0; }
+    .distribution-bar.weight { background:#f5822a; }
+    .distribution-bar.heads { background:#43a047; }
+    .distribution-bar span { position:absolute; bottom:calc(100% + 2px); left:50%; transform:translateX(-50%); color:var(--muted); font-size:6.5px; white-space:nowrap; }
+    .distribution-group small { display:block; margin-top:3px; color:var(--muted); font-size:6.5px; white-space:nowrap; }
+    .distribution-page .distribution-card { height:390px; }
+    .distribution-page .distribution-card h2 { height:34px; padding-top:10px; font-size:15px; }
+    .distribution-page .distribution-legend { height:28px; font-size:9px; }
+    .distribution-page .distribution-chart { height:315px; padding:0 72px 16px; gap:30px; }
+    .distribution-page .distribution-bars { height:275px; gap:10px; }
+    .distribution-page .distribution-bar-wrap { width:56px; height:260px; }
+    .distribution-page .distribution-bar span { font-size:9px; }
+    .distribution-page .distribution-group small { margin-top:6px; font-size:10px; }
+    .distribution-page .weight-card { margin-top:12px; }
+    .distribution-page .weight-card h2 { height:29px; padding-top:8px; font-size:14px; }
+    .distribution-page .weight-card table { font-size:10px; }
+    .distribution-page .weight-card th { padding:5px 9px; font-size:7px; }
+    .distribution-page .weight-card td { padding:4px 9px; }
+    .distribution-page .observations { margin-top:12px; }
     .weight-card { min-height:104px; margin-top:8px; overflow:visible; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.96); }
     .weight-card h2 { height:23px; margin:0; padding:6px 14px 0; background:var(--pale); text-align:center; font-size:11px; text-transform:uppercase; }
     .weight-card table { font-size:7.2px; }
@@ -110,7 +143,7 @@
       </section>
       <div class="grid">
         <section class="section"><h2>Distribuição por dentição</h2><div class="bar-chart">
-          {{range $index, $item := $report.Denticoes}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{barColor $index}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{$item.Denticao}} dentes</h3><small>{{if eq $item.Denticao 0}}até 18 meses{{else if eq $item.Denticao 2}}18 a 24 meses{{else if eq $item.Denticao 4}}24 a 36 meses{{else if eq $item.Denticao 6}}36 a 48 meses{{else if eq $item.Denticao 8}}acima de 48 meses{{end}}</small><b>{{$item.Quantidade}} animais</b></div>{{end}}
+          {{range $item := $report.Denticoes}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{denticaoBarColor $item.Denticao}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{$item.Denticao}} dentes</h3><small>{{if eq $item.Denticao 0}}até 18 meses{{else if eq $item.Denticao 2}}18 a 24 meses{{else if eq $item.Denticao 4}}24 a 36 meses{{else if eq $item.Denticao 6}}36 a 48 meses{{else if eq $item.Denticao 8}}acima de 48 meses{{end}}</small><b>{{$item.Quantidade}} animais</b></div>{{end}}
         </div></section>
         <section class="section"><h2>Esvaziamento gástrico</h2><div class="gastric">
           <div class="gastric-row"><span>Peso médio balança (fazenda)</span><strong>{{formatNumber $report.MediaKGFazenda 2}} kg</strong></div>
@@ -120,7 +153,7 @@
           <div class="gastric-row"><span>Balanção frigorífico</span><strong>{{formatNumber $report.Abate.EtapaFrigorifico.Balancao 2}} kg</strong></div>
         </div></section>
         <section class="section finishing"><h2>Acabamento de carcaça</h2><div class="bar-chart">
-          {{range $index, $item := $report.Acabamentos}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{barColor $index}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{upper $item.Classificacao}}</h3><small>{{$item.Quantidade}} animais</small></div>{{end}}
+          {{range $item := $report.Acabamentos}}<div class="bar-item"><div class="plot"><div class="track" style="--height:{{barHeight $item.Percentual}};--color:{{acabamentoBarColor $item.Classificacao}}"><div class="fill"></div><span class="percent">{{formatPercent $item.Percentual}}</span></div></div><h3>{{upper $item.Classificacao}}</h3><small>{{$item.Quantidade}} animais</small></div>{{end}}
         </div></section>
         <section class="section"><h2>Classificação do frigorífico</h2><div class="classification-wrap">
           <table><thead><tr><th>Classificação</th><th>Faixa de peso</th><th>Qtd.</th><th>%</th><th>Penalização</th></tr></thead><tbody>
@@ -129,11 +162,31 @@
           </tbody></table><div class="source-note">Valores reproduzidos conforme os dados registrados no abate.</div>
         </div></section>
       </div>
-      <section class="weight-card"><h2>Distribuição do peso e quantidade de cabeças</h2><table>
+    </div>
+    <img class="watermark" alt="" aria-hidden="true" src="{{safeURL $.BrandDataURL}}">
+  </main>
+  <main class="page distribution-page">
+    <div class="accent"></div>
+    <div class="content">
+      <header class="header">
+        <div><h1>DISTRIBUIÇÃO DE PESO E CABEÇAS</h1><p>{{upper $report.Abate.NomeProprietario}} / {{upper $report.Abate.NomeFazenda}} — Lote {{$report.Abate.DadosGeraisAbate.NumeroLote}}</p></div>
+        <img class="brand" alt="Tecnutre" src="{{safeURL $.BrandDataURL}}">
+      </header>
+      <section class="distribution-card"><h2>Distribuição do peso e quantidade de cabeças</h2>
+        <div class="distribution-legend"><span class="distribution-key" style="--key-color:#43a047">Cabeças</span></div>
+        {{ $maxCabecas := maxDistributionHeads $report.DistribuicoesPeso }}
+        <div class="distribution-chart">{{range $item := $report.DistribuicoesPeso}}<div class="distribution-group"><div class="distribution-bars"><div class="distribution-bar-wrap"><div class="distribution-bar heads" style="--distribution-height:{{distributionHeadsBarHeight $item.Quantidade $maxCabecas}}"><span>{{$item.Quantidade}}</span></div></div></div><small>{{$item.Classificacao}}</small></div>{{end}}</div>
+      </section>
+      <!-- <section class="distribution-card"><h2>Distribuição do peso e quantidade de cabeças</h2>
+        <div class="distribution-legend"><span class="distribution-key" style="--key-color:#f5822a">Peso total (kg)</span><span class="distribution-key" style="--key-color:#43a047">Cabeças</span></div>
+        {{ $maxPeso := maxDistributionWeight $report.DistribuicoesPeso }}{{ $maxCabecas := maxDistributionHeads $report.DistribuicoesPeso }}
+        <div class="distribution-chart">{{range $item := $report.DistribuicoesPeso}}<div class="distribution-group"><div class="distribution-bars"><div class="distribution-bar-wrap"><div class="distribution-bar weight" style="--distribution-height:{{distributionBarHeight $item.PesoTotal $maxPeso}}"><span>{{formatNumber $item.PesoTotal 0}}</span></div></div><div class="distribution-bar-wrap"><div class="distribution-bar heads" style="--distribution-height:{{distributionHeadsBarHeight $item.Quantidade $maxCabecas}}"><span>{{$item.Quantidade}}</span></div></div></div><small>{{$item.Classificacao}}</small></div>{{end}}</div>
+      </section> -->
+      <!-- <section class="weight-card"><h2>Detalhamento da distribuição de peso</h2><table>
         <thead><tr><th>Classificação</th><th>Peso KG</th><th>Média KG</th><th>@ por cab.</th><th>Percentual</th></tr></thead><tbody>
         {{range $item := $report.DistribuicoesPeso}}<tr><td>{{$item.Quantidade}} {{if eq $item.Classificacao "acima de 24"}}{{$item.Classificacao}}{{else}}de {{$item.Classificacao}}{{end}} arrobas</td><td>{{formatNumber $item.PesoTotal 2}}</td><td>{{formatNumber $item.MediaKG 2}}</td><td>{{formatNumber $item.MediaArroba 2}}</td><td>{{formatPercent $item.Percentual}}</td></tr>{{end}}
         <tr class="total"><td>{{$report.QuantidadeAnimais}} animais</td><td>{{formatNumber $report.Abate.EtapaFrigorifico.PesoTotal 2}}</td><td>{{formatNumber $report.MediaKGFrigorifico 2}}</td><td>{{formatNumber $report.MediaArrobaFrigorifico 2}}</td><td>{{if hasValue $report.Abate.EtapaFrigorifico.PesoTotal}}100,0%{{else}}0,0%{{end}}</td></tr>
-        </tbody></table></section>
+          </tbody></table></section> -->
       <section class="observations"><h2>Observações do abate</h2><p>{{$report.Observacao}}</p></section>
       <footer><span>Relatório gerado a partir dos dados registrados no abate.</span><span>TECNUTRE | Assessoria em abates, contenção e pesagem em bovinos</span></footer>
     </div>

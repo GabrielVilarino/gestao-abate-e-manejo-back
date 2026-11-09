@@ -498,7 +498,7 @@ func TestAbateServiceGeneratesReportWithCalculationsAndPhotos(t *testing.T) {
 		if report.Denticoes[0].Percentual != 33.3 || report.Denticoes[2].Quantidade != 0 || report.Denticoes[2].Percentual != 0 {
 			t.Fatalf("dentições=%+v", report.Denticoes)
 		}
-		if report.Acabamentos[2].Percentual != 66.7 || report.Acabamentos[0].Quantidade != 0 || report.Acabamentos[0].Percentual != 0 {
+		if report.Acabamentos[3].Percentual != 66.7 || report.Acabamentos[0].Quantidade != 0 || report.Acabamentos[0].Percentual != 0 {
 			t.Fatalf("percentuais=%+v", report)
 		}
 		if report.Classificacoes[2].Classificacao != domain.ClassificacaoFrigorificoBoiMedioNormal || report.Classificacoes[2].Quantidade != 3 || report.Classificacoes[0].Quantidade != 0 {
@@ -560,7 +560,7 @@ func TestAbateServiceReportUsesCanonicalOrderAndIgnoresValuesOutsideCatalog(t *t
 				{QtdDenticao: 3, QtdAnimais: 99},
 			},
 			AcabamentoCarcaca: []domain.AcabamentoCarcaca{
-				{Acabamento: domain.AcabamentoCarcacaMedianoUP, QtdAnimais: 2},
+				{Acabamento: domain.AcabamentoCarcacaEscassoPositiva, QtdAnimais: 2},
 				{Acabamento: "FORA DO CATÁLOGO", QtdAnimais: 99},
 			},
 			ClassificacaoFrigorifico: []domain.ClassificacaoFrigorifico{

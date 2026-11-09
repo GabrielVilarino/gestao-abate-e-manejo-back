@@ -18,7 +18,7 @@ type QtdDenticaoRequest struct {
 }
 
 type AcabamentoCarcacaRequest struct {
-	Acabamento string `json:"acabamento" binding:"required,oneof='AUSENTE' 'ESCASSO' 'MEDIANO' 'UNIFORME' 'EXCESSIVO' 'MEDIANO UP'"`
+	Acabamento string `json:"acabamento" binding:"required,oneof='AUSENTE' 'ESCASSO' 'ESCASSO POSITIVA' 'MEDIANO' 'UNIFORME' 'EXCESSIVO'"`
 	QtdAnimais int    `json:"qtd_animais" binding:"gte=0"`
 }
 

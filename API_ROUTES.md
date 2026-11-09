@@ -178,7 +178,7 @@ Exemplo para criar o abate (campos numéricos não podem ser negativos; IDs e lo
 Na criação e nas atualizações das etapas, os valores de classificação são exatos e aceitam somente os seguintes catálogos:
 
 - `denticao`: `0`, `2`, `4`, `6` ou `8`;
-- `acabamento`: `AUSENTE`, `ESCASSO`, `MEDIANO`, `UNIFORME`, `EXCESSIVO` ou `MEDIANO UP`;
+- `acabamento`: `AUSENTE`, `ESCASSO`, `ESCASSO POSITIVA`, `MEDIANO`, `UNIFORME` ou `EXCESSIVO`;
 - `classificacao_frigorifico.classificacao`: `BOI FRACO`, `BOI LEVE`, `BOI MÉDIO / NORMAL` ou `BOI PESADO`;
 - `distribuicao_peso.classificacao`: `18 a 19.9`, `20 a 21.9`, `22 a 23.9` ou `acima de 24`.
 

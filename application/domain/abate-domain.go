@@ -12,12 +12,12 @@ const (
 	DenticaoSeis   = 6
 	DenticaoOito   = 8
 
-	AcabamentoCarcacaAusente   = "AUSENTE"
-	AcabamentoCarcacaEscasso   = "ESCASSO"
-	AcabamentoCarcacaMediano   = "MEDIANO"
-	AcabamentoCarcacaUniforme  = "UNIFORME"
-	AcabamentoCarcacaExcessivo = "EXCESSIVO"
-	AcabamentoCarcacaMedianoUP = "MEDIANO UP"
+	AcabamentoCarcacaAusente         = "AUSENTE"
+	AcabamentoCarcacaEscasso         = "ESCASSO"
+	AcabamentoCarcacaEscassoPositiva = "ESCASSO POSITIVA"
+	AcabamentoCarcacaMediano         = "MEDIANO"
+	AcabamentoCarcacaUniforme        = "UNIFORME"
+	AcabamentoCarcacaExcessivo       = "EXCESSIVO"
 
 	ClassificacaoFrigorificoBoiFraco       = "BOI FRACO"
 	ClassificacaoFrigorificoBoiLeve        = "BOI LEVE"
@@ -38,10 +38,10 @@ func AcabamentosCarcacaAbate() []string {
 	return []string{
 		AcabamentoCarcacaAusente,
 		AcabamentoCarcacaEscasso,
+		AcabamentoCarcacaEscassoPositiva,
 		AcabamentoCarcacaMediano,
 		AcabamentoCarcacaUniforme,
 		AcabamentoCarcacaExcessivo,
-		AcabamentoCarcacaMedianoUP,
 	}
 }
 
